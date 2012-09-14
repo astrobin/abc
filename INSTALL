@@ -1,0 +1,14 @@
+First, configure the CFITSIO library:
+
+  cd cfitsio
+  ./configure
+
+then ABC:
+
+  cd ..
+  qmake
+
+and finally build the whole project:
+
+  make
+

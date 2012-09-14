@@ -1,6 +1,7 @@
 *.a
 *.o
-/cfitsio/Makefile
+.*
 /cfitsio/cfitsio.pc
 /cfitsio/config.log
 /cfitsio/config.status
+Makefile
