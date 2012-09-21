@@ -63,9 +63,7 @@ bool ImageData::loadFits(const QString &fileName)
         return false;
     }
 
-    size = QSize(axes[0], axes[1]);
-    long numPixels = size.width() * size.height();
-    pixels = new PixelValue[numPixels];
+    long numPixels = resize(QSize(axes[0], axes[1]));
     long firstPixels[2];
     firstPixels[0] = firstPixels[1] = 1;
     fits_read_pix(ff, PIXEL_VALUE_FITS_TYPE, firstPixels, numPixels,
@@ -79,6 +77,17 @@ bool ImageData::loadFits(const QString &fileName)
 
     fits_close_file(ff, &status);
     return true;
+}
+
+long ImageData::resize(const QSize &newSize)
+{
+    long numPixels = newSize.width() * newSize.height();
+    if (size == newSize) return numPixels;
+
+    size = newSize;
+    delete pixels;
+    pixels = new PixelValue[numPixels];
+    return numPixels;
 }
 
 Image Image::fromFile(const QString &fileName)

@@ -37,6 +37,7 @@ public:
     ~ImageData();
 
     bool loadFits(const QString &fileName);
+    long resize(const QSize &newSize);
 
     QSize size;
     PixelValue *pixels;
