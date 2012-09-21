@@ -44,4 +44,26 @@ void AbcTest::loadFits()
     QCOMPARE(image.size(), QSize(512, 512));
 }
 
+void AbcTest::computeAverage()
+{
+    Image average;
+    Image source;
+
+    bool ok = source.load("UIT.fits");
+    QVERIFY(ok);
+
+    QList<Image> images;
+    images.append(source);
+    images.append(source);
+    images.append(source);
+
+    average.setAverageOf(images);
+    QCOMPARE(average.size(), source.size());
+
+    long numPixels = average.size().width() * average.size().height();
+    for (long i = 0; i < numPixels; i++) {
+        QVERIFY(qFuzzyCompare(average.d->pixels[i], source.d->pixels[i]));
+    }
+}
+
 QTEST_MAIN(AbcTest)

@@ -34,6 +34,7 @@ private Q_SLOTS:
     void cleanupTestCase();
 
     void loadFits();
+    void computeAverage();
 };
 
 }; // namespace

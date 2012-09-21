@@ -44,6 +44,8 @@ public:
     PixelValue *pixels;
 };
 
+class AbcTest;
+
 class Image
 {
 public:
@@ -59,6 +61,7 @@ public:
     QSize size() const { return d->size; }
 
 private:
+    friend class AbcTest;
     QSharedDataPointer<ImageData> d;
 };
 
