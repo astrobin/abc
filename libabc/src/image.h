@@ -34,6 +34,7 @@ class ImageData: public QSharedData
 {
 public:
     ImageData();
+    ImageData(const ImageData &other);
     ~ImageData();
 
     bool loadFits(const QString &fileName);

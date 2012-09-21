@@ -33,6 +33,14 @@ ImageData::ImageData():
 {
 }
 
+ImageData::ImageData(const ImageData &other):
+    QSharedData(other),
+    pixels(0)
+{
+    long numPixels = resize(other.size);
+    memcpy(pixels, other.pixels, numPixels * sizeof(PixelValue));
+}
+
 ImageData::~ImageData()
 {
     delete pixels;
