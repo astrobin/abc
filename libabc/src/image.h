@@ -53,6 +53,7 @@ public:
     static Image fromFile(const QString &fileName);
 
     bool load(const QString &fileName);
+    void setAverageOf(const QList<Image> &images);
 
     QSize size() const { return d->size; }
 
