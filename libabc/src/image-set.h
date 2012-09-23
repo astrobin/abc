@@ -42,6 +42,7 @@ public:
     QRect boundingRect() const;
 
     Image average() const;
+    Image sigmaClip(float sigmaFactor) const;
 
 private:
     ImageSetPrivate *d_ptr;

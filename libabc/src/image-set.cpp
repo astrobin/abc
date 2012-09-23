@@ -22,6 +22,7 @@
 
 #include <QDebug>
 #include <QTransform>
+#include <math.h>
 
 using namespace ABC;
 
@@ -34,6 +35,7 @@ class ImageSetPrivate
     ImageSetPrivate() {};
 
     Image uniformAverage() const;
+    Image uniformSigmaClip(float sigmaFactor) const;
 
     QList<Image> images;
     QList<QTransform> transformations;
@@ -53,6 +55,49 @@ Image ImageSetPrivate::uniformAverage() const
             sum += image.d->pixels[i];
         }
         result.d->pixels[i] = sum / numImages;
+    }
+
+    return result;
+}
+
+Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
+{
+    Image result;
+    long numPixels = result.d->resize(images[0].size());
+    int numImages = images.count();
+    for (long i = 0; i < numPixels; i++) {
+        PixelValue sum = 0;
+        foreach (const Image &image, images) {
+            sum += image.d->pixels[i];
+        }
+        PixelValue average = sum / numImages;
+
+        // Calculate standard deviation
+        sum = 0;
+        foreach (const Image &image, images) {
+            sum += powf(image.d->pixels[i] - average, 2);
+        }
+        PixelValue standardDeviation = sqrtf(sum);
+
+        PixelValue min = average - sigmaFactor * standardDeviation;
+        PixelValue max = average + sigmaFactor * standardDeviation;
+        sum = 0;
+        int validImages = 0;
+        foreach (const Image &image, images) {
+            PixelValue pixel = image.d->pixels[i];
+            if (pixel >= min && pixel <= max) {
+                validImages++;
+                sum += pixel;
+            }
+        }
+
+        if (validImages > 0) {
+            result.d->pixels[i] = sum / validImages;
+        } else {
+            /* This can happen for too low values of sigmaFactor, or when pixel
+             * values are all too far from the average */
+            result.d->pixels[i] = average;
+        }
     }
 
     return result;
@@ -120,4 +165,16 @@ Image ImageSet::average() const
     }
 
     return d->uniformAverage();
+}
+
+Image ImageSet::sigmaClip(float sigmaFactor) const
+{
+    Q_D(const ImageSet);
+
+    if (!d->transformations.isEmpty()) {
+        qWarning() << "Sigma clip not implemented for transformed images";
+        return Image();
+    }
+
+    return d->uniformSigmaClip(sigmaFactor);
 }
