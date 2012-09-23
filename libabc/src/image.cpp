@@ -110,3 +110,26 @@ bool Image::load(const QString &fileName)
     // TODO: if loading a FITS fail, fallback to a raw file
     return d->loadFits(fileName);
 }
+
+QImage Image::toQImage() const
+{
+    // Generate a greyscale colormap
+    QVector<QRgb> greyScale(256);
+    for (int i = 0; i < 256; i++) {
+        greyScale[i] = qRgb(i, i, i);
+    }
+
+    // Convert floating point pixels to indexes
+    int width = d->size.width();
+    int height = d->size.height();
+    int numPixels = width * height;
+    QByteArray pixels;
+    pixels.resize(numPixels);
+    for (int i = 0; i < numPixels; i++) {
+        pixels[i] = (unsigned char)(d->pixels[i] * 255);
+    }
+    QImage result((unsigned char *)pixels.constData(),
+                  width, height, QImage::Format_Indexed8);
+    result.setColorTable(greyScale);
+    return result.copy();
+}

@@ -21,6 +21,7 @@
 #ifndef ABC_IMAGE_H
 #define ABC_IMAGE_H
 
+#include <QImage>
 #include <QSize>
 #include <QSharedData>
 #include <QString>
@@ -59,6 +60,7 @@ public:
     bool load(const QString &fileName);
 
     QSize size() const { return d->size; }
+    QImage toQImage() const;
 
 private:
     friend class AbcTest;
