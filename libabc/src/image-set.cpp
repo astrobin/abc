@@ -33,12 +33,30 @@ class ImageSetPrivate
 
     ImageSetPrivate() {};
 
+    Image uniformAverage() const;
+
     QList<Image> images;
     QList<QTransform> transformations;
     QRect boundingRect;
 };
 
 }; // namespace
+
+Image ImageSetPrivate::uniformAverage() const
+{
+    Image result;
+    long numPixels = result.d->resize(images[0].size());
+    int numImages = images.count();
+    for (long i = 0; i < numPixels; i++) {
+        PixelValue sum = 0;
+        foreach (const Image &image, images) {
+            sum += image.d->pixels[i];
+        }
+        result.d->pixels[i] = sum / numImages;
+    }
+
+    return result;
+}
 
 ImageSet::ImageSet():
     d_ptr(new ImageSetPrivate)
@@ -101,7 +119,5 @@ Image ImageSet::average() const
         return Image();
     }
 
-    Image result;
-    result.setAverageOf(d->images);
-    return result;
+    return d->uniformAverage();
 }

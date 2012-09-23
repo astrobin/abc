@@ -45,6 +45,7 @@ public:
 };
 
 class AbcTest;
+class ImageSetPrivate;
 
 class Image
 {
@@ -56,12 +57,12 @@ public:
     static Image fromFile(const QString &fileName);
 
     bool load(const QString &fileName);
-    void setAverageOf(const QList<Image> &images);
 
     QSize size() const { return d->size; }
 
 private:
     friend class AbcTest;
+    friend class ImageSetPrivate;
     QSharedDataPointer<ImageData> d;
 };
 

@@ -110,22 +110,3 @@ bool Image::load(const QString &fileName)
     // TODO: if loading a FITS fail, fallback to a raw file
     return d->loadFits(fileName);
 }
-
-void Image::setAverageOf(const QList<Image> &images)
-{
-    // This method assumes that all images have the same size
-    if (images.isEmpty()) {
-        d = new ImageData;
-        return;
-    }
-
-    long numPixels = d->resize(images[0].size());
-    int numImages = images.count();
-    for (long i = 0; i < numPixels; i++) {
-        PixelValue sum = 0;
-        foreach (const Image &image, images) {
-            sum += image.d->pixels[i];
-        }
-        d->pixels[i] = sum / numImages;
-    }
-}
