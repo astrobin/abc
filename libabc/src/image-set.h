@@ -18,25 +18,36 @@
  * along with libabc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ABC_TEST_H
-#define ABC_TEST_H
+#ifndef ABC_IMAGE_SET_H
+#define ABC_IMAGE_SET_H
 
-#include <QTest>
+#include "image.h"
+
+#include <QRect>
+
+class QTransform;
 
 namespace ABC {
 
-class AbcTest: public QObject
+class ImageSetPrivate;
+class ImageSet
 {
-    Q_OBJECT
+public:
+    ImageSet();
+    virtual ~ImageSet();
 
-private Q_SLOTS:
-    void initTestCase();
-    void cleanupTestCase();
+    bool addImage(const Image &image);
+    bool addImage(const Image &image, const QTransform &transform);
 
-    void loadFits();
-    void imageSetAverage();
+    QRect boundingRect() const;
+
+    Image average() const;
+
+private:
+    ImageSetPrivate *d_ptr;
+    Q_DECLARE_PRIVATE(ImageSet)
 };
 
 }; // namespace
 
-#endif /* ABC_TEST_H */
+#endif /* ABC_IMAGE_SET_H */

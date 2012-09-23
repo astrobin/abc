@@ -20,6 +20,7 @@
 
 #include "abc-test.h"
 
+#include "image-set.h"
 #include "image.h"
 #include <QDebug>
 
@@ -44,20 +45,19 @@ void AbcTest::loadFits()
     QCOMPARE(image.size(), QSize(512, 512));
 }
 
-void AbcTest::computeAverage()
+void AbcTest::imageSetAverage()
 {
-    Image average;
     Image source;
 
     bool ok = source.load("UIT.fits");
     QVERIFY(ok);
 
-    QList<Image> images;
-    images.append(source);
-    images.append(source);
-    images.append(source);
+    ImageSet images;
+    images.addImage(source);
+    images.addImage(source);
+    images.addImage(source);
 
-    average.setAverageOf(images);
+    Image average = images.average();
     QCOMPARE(average.size(), source.size());
 
     long numPixels = average.size().width() * average.size().height();

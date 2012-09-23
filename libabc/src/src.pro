@@ -7,4 +7,5 @@ LIBS += -L$${TOP_BUILD_DIR}/cfitsio -lcfitsio
 INCLUDEPATH += $${TOP_SRC_DIR}/cfitsio
 
 SOURCES += \
+    image-set.cpp \
     image.cpp
