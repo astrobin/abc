@@ -18,9 +18,9 @@
  * along with libabc.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "debug.h"
 #include "image.h"
 
-#include <QDebug>
 #include <fitsio.h>
 
 using namespace ABC;
