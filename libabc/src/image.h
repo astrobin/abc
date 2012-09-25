@@ -62,6 +62,11 @@ public:
     QSize size() const { return d->size; }
     QImage toQImage() const;
 
+    bool operator==(const Image &other) const;
+    bool operator!=(const Image &other) const;
+    Image operator+(const Image &other) const;
+    Image operator-(const Image &other) const;
+
 private:
     friend class AbcTest;
     friend class ImageSetPrivate;

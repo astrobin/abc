@@ -133,3 +133,53 @@ QImage Image::toQImage() const
     result.setColorTable(greyScale);
     return result.copy();
 }
+
+bool Image::operator==(const Image &other) const
+{
+    if (other.d->size != d->size) {
+        return false;
+    }
+
+    long numPixels = d->size.width() * d->size.height();
+    for (long i = 0; i < numPixels; i++) {
+        if (!qFuzzyCompare(d->pixels[i], other.d->pixels[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Image::operator!=(const Image &other) const
+{
+    return !(*this == other);
+}
+
+Image Image::operator+(const Image &other) const
+{
+    if (other.d->size != d->size) {
+        qWarning() << "Size mismatch";
+        return Image();
+    }
+
+    Image result;
+    long numPixels = result.d->resize(d->size);
+    for (long i = 0; i < numPixels; i++) {
+        result.d->pixels[i] = d->pixels[i] + other.d->pixels[i];
+    }
+    return result;
+}
+
+Image Image::operator-(const Image &other) const
+{
+    if (other.d->size != d->size) {
+        qWarning() << "Size mismatch";
+        return Image();
+    }
+
+    Image result;
+    long numPixels = result.d->resize(d->size);
+    for (long i = 0; i < numPixels; i++) {
+        result.d->pixels[i] = d->pixels[i] - other.d->pixels[i];
+    }
+    return result;
+}

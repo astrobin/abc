@@ -98,4 +98,25 @@ void AbcTest::imageSetBounds()
     QCOMPARE(images.boundingRect(), expectedBounds);
 }
 
+void AbcTest::imageOperations()
+{
+    Image a = Image::fromFile("32i/0.fit");
+    Image b = Image::fromFile("1_32i.fit");
+    Image c = Image::fromFile("2_64f.fit");
+
+    QCOMPARE(a - a, b - b);
+    QCOMPARE(a - a, c - c);
+
+    Image ab = a + b;
+    Image bc = b + c;
+    Image ca = a + c;
+    Image sum = a + b + c;
+    QVERIFY(sum != a);
+    QVERIFY(sum != b);
+    QVERIFY(sum != c);
+    QCOMPARE(sum + sum, ab + bc + ca);
+    QCOMPARE(ab + bc, sum + b);
+    QCOMPARE(ab + bc - b, sum);
+}
+
 QTEST_MAIN(AbcTest)
