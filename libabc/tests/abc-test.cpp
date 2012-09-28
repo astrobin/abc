@@ -41,9 +41,11 @@ void AbcTest::cleanupTestCase()
 void AbcTest::loadFits()
 {
     Image image;
+    QVERIFY(!image.isValid());
 
     bool ok = image.load("UIT.fits");
     QVERIFY(ok);
+    QVERIFY(image.isValid());
     QCOMPARE(image.size(), QSize(512, 512));
 }
 

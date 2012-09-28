@@ -59,6 +59,7 @@ public:
 
     bool load(const QString &fileName);
 
+    bool isValid() const { return d->size.isValid(); }
     QSize size() const { return d->size; }
     QImage toQImage() const;
 
