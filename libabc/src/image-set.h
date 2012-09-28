@@ -44,6 +44,10 @@ public:
     Image average() const;
     Image sigmaClip(float sigmaFactor) const;
 
+    void setSubtractCorrection(const Image &subtrahend);
+    void setDivisionCorrection(const Image &divisor);
+    void clearCorrections();
+
 private:
     ImageSetPrivate *d_ptr;
     Q_DECLARE_PRIVATE(ImageSet)
