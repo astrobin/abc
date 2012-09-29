@@ -21,20 +21,24 @@
 #include "debug.h"
 #include "image.h"
 
+#include <QFileInfo>
 #include <fitsio.h>
 
 using namespace ABC;
 
 #define PIXEL_VALUE_FITS_TYPE \
     (sizeof(PixelValue) == sizeof(float) ? TFLOAT : TDOUBLE)
+#define FITS_RECORD_LENGTH 81
 
 ImageData::ImageData():
+    type(UnknownType),
     pixels(0)
 {
 }
 
 ImageData::ImageData(const ImageData &other):
     QSharedData(other),
+    type(other.type),
     pixels(0)
 {
     long numPixels = resize(other.size);
@@ -45,6 +49,32 @@ ImageData::~ImageData()
 {
     delete pixels;
     pixels = 0;
+}
+
+/* Infer the image type from a string. This can be coming either from a header
+ * record or the filename.
+ * Some of the used values are listed here:
+ * http://www.cyanogen.com/help/maximdl/SettingsFITSHeader.htm
+ */
+static ImageType typeFromString(const QString typeString)
+{
+    if (typeString.contains("light", Qt::CaseInsensitive)) {
+        return Light;
+    } else if (typeString.contains("bias", Qt::CaseInsensitive) ||
+               typeString.contains("offset", Qt::CaseInsensitive) ||
+               typeString == "zero") {
+        return Offset;
+    } else if (typeString.contains("flat", Qt::CaseInsensitive)) {
+        if (typeString.contains("dark", Qt::CaseInsensitive)) {
+            return DarkFlat;
+        } else {
+            return Flat;
+        }
+    } else if (typeString.contains("dark", Qt::CaseInsensitive)) {
+        return Dark;
+    } else {
+        return UnknownType;
+    }
 }
 
 bool ImageData::loadFits(const QString &fileName)
@@ -83,6 +113,18 @@ bool ImageData::loadFits(const QString &fileName)
         return false;
     }
 
+    /* Read the image type. Some of the used values are listed here:
+     * http://www.cyanogen.com/help/maximdl/SettingsFITSHeader.htm
+     */
+    char headerRecord[FITS_RECORD_LENGTH];
+    fits_read_key(ff, TSTRING, "IMAGETYP", headerRecord, NULL, &status);
+    if (status == 0) {
+        QString typeString = QString::fromLatin1(headerRecord);
+        type = typeFromString(typeString);
+    } else {
+        type = UnknownType;
+    }
+
     fits_close_file(ff, &status);
     return true;
 }
@@ -108,7 +150,14 @@ Image Image::fromFile(const QString &fileName)
 bool Image::load(const QString &fileName)
 {
     // TODO: if loading a FITS fail, fallback to a raw file
-    return d->loadFits(fileName);
+    bool ok = d->loadFits(fileName);
+
+    if (ok && d->type == UnknownType) {
+        QFileInfo fi(fileName);
+        d->type = typeFromString(fi.baseName());
+    }
+
+    return ok;
 }
 
 QImage Image::toQImage() const

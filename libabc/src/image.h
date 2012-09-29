@@ -31,6 +31,15 @@ namespace ABC {
 // This can be changed to double if more precision is needed
 typedef float PixelValue;
 
+enum ImageType {
+    UnknownType = 0,
+    Light,
+    Offset,
+    Dark,
+    Flat,
+    DarkFlat,
+};
+
 class ImageData: public QSharedData
 {
 public:
@@ -41,6 +50,7 @@ public:
     bool loadFits(const QString &fileName);
     long resize(const QSize &newSize);
 
+    ImageType type;
     QSize size;
     PixelValue *pixels;
 };
@@ -59,6 +69,7 @@ public:
 
     bool load(const QString &fileName);
 
+    ImageType type() const { return d->type; }
     bool isValid() const { return d->size.isValid(); }
     QSize size() const { return d->size; }
     QImage toQImage() const;
