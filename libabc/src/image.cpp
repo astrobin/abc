@@ -43,6 +43,7 @@ ImageData::ImageData(const ImageData &other):
     type(other.type),
     temperature(other.temperature),
     exposure(other.exposure),
+    cameraModel(other.cameraModel),
     pixels(0)
 {
     long numPixels = resize(other.size);
@@ -142,6 +143,15 @@ bool ImageData::loadFits(const QString &fileName)
             exposure = -1;
             status = 0;
         }
+    }
+
+    /* Camera model. */
+    fits_read_key(ff, TSTRING, "INSTRUME", headerRecord, NULL, &status);
+    if (status == 0) {
+        cameraModel = QString::fromLatin1(headerRecord);
+    } else {
+        cameraModel = QString();
+        status = 0;
     }
 
     fits_close_file(ff, &status);

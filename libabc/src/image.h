@@ -54,6 +54,7 @@ public:
     ImageType type;
     float temperature;
     float exposure;
+    QString cameraModel;
     QSize size;
     PixelValue *pixels;
 };
@@ -83,6 +84,8 @@ public:
     }
 
     float exposure() const { return d->exposure; }
+
+    QString cameraModel() const { return d->cameraModel; }
 
     void divide(const Image &other);
 

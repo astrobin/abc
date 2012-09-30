@@ -109,6 +109,7 @@ void AbcTest::imageOperations()
     QCOMPARE(b.type(), Light);
     QCOMPARE(b.temperature(), -20.0016f);
     QCOMPARE(b.exposure(), 900.0f);
+    QCOMPARE(b.cameraModel(), QLatin1String("G2-1600, Id: 2115"));
     Image c = Image::fromFile("2_64f.fit");
 
     QCOMPARE(a - a, b - b);
