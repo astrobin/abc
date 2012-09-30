@@ -37,7 +37,6 @@ enum ImageType {
     Offset,
     Dark,
     Flat,
-    DarkFlat,
 };
 
 class ImageData: public QSharedData

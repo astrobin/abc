@@ -65,11 +65,7 @@ static ImageType typeFromString(const QString typeString)
                typeString == "zero") {
         return Offset;
     } else if (typeString.contains("flat", Qt::CaseInsensitive)) {
-        if (typeString.contains("dark", Qt::CaseInsensitive)) {
-            return DarkFlat;
-        } else {
-            return Flat;
-        }
+        return Flat;
     } else if (typeString.contains("dark", Qt::CaseInsensitive)) {
         return Dark;
     } else {
