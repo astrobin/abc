@@ -28,11 +28,11 @@ using namespace ABC;
 
 namespace ABC {
 
-class ImageSetPrivate
+class ImageSetPrivate: public QSharedData
 {
-    friend class ImageSet;
-
+public:
     ImageSetPrivate() {};
+    inline ImageSetPrivate(const ImageSetPrivate &other);
 
     Image uniformAverage() const;
     Image uniformSigmaClip(float sigmaFactor) const;
@@ -44,6 +44,15 @@ class ImageSetPrivate
 };
 
 }; // namespace
+
+ImageSetPrivate::ImageSetPrivate(const ImageSetPrivate &other):
+    QSharedData(other),
+    images(other.images),
+    transformations(other.transformations),
+    subtrahend(other.subtrahend),
+    boundingRect(other.boundingRect)
+{
+}
 
 Image ImageSetPrivate::uniformAverage() const
 {
@@ -121,20 +130,21 @@ Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
 }
 
 ImageSet::ImageSet():
-    d_ptr(new ImageSetPrivate)
+    d(new ImageSetPrivate)
+{
+}
+
+ImageSet::ImageSet(const ImageSet &other):
+    d(other.d)
 {
 }
 
 ImageSet::~ImageSet()
 {
-    delete d_ptr;
-    d_ptr = 0;
 }
 
 bool ImageSet::addImage(const Image &image)
 {
-    Q_D(ImageSet);
-
     // Fail if this set contains images with transformations
     if (!d->transformations.isEmpty()) return false;
 
@@ -152,8 +162,6 @@ bool ImageSet::addImage(const Image &image)
 
 bool ImageSet::addImage(const Image &image, const QTransform &transform)
 {
-    Q_D(ImageSet);
-
     // Fail if this set contains images without transformations
     if (d->transformations.count() != d->images.count()) return false;
 
@@ -168,14 +176,11 @@ bool ImageSet::addImage(const Image &image, const QTransform &transform)
 
 QRect ImageSet::boundingRect() const
 {
-    Q_D(const ImageSet);
     return d->boundingRect;
 }
 
 Image ImageSet::average() const
 {
-    Q_D(const ImageSet);
-
     if (!d->transformations.isEmpty()) {
         qWarning() << "Average not implemented for transformed images";
         return Image();
@@ -186,8 +191,6 @@ Image ImageSet::average() const
 
 Image ImageSet::sigmaClip(float sigmaFactor) const
 {
-    Q_D(const ImageSet);
-
     if (!d->transformations.isEmpty()) {
         qWarning() << "Sigma clip not implemented for transformed images";
         return Image();
@@ -198,12 +201,10 @@ Image ImageSet::sigmaClip(float sigmaFactor) const
 
 void ImageSet::setSubtractCorrection(const Image &subtrahend)
 {
-    Q_D(ImageSet);
     d->subtrahend = subtrahend;
 }
 
 void ImageSet::clearCorrections()
 {
-    Q_D(ImageSet);
     d->subtrahend = Image();
 }

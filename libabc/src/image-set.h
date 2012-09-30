@@ -34,6 +34,7 @@ class ImageSet
 {
 public:
     ImageSet();
+    ImageSet(const ImageSet &other);
     virtual ~ImageSet();
 
     bool addImage(const Image &image);
@@ -48,8 +49,7 @@ public:
     void clearCorrections();
 
 private:
-    ImageSetPrivate *d_ptr;
-    Q_DECLARE_PRIVATE(ImageSet)
+    QSharedDataPointer<ImageSetPrivate> d;
 };
 
 }; // namespace
