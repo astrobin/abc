@@ -77,6 +77,7 @@ void AbcTest::imageSetBounds()
 
     bool ok = source.load("UIT.fits");
     QVERIFY(ok);
+    QCOMPARE(source.exposure(), 83.2f);
 
     ImageSet images;
     QVERIFY(images.addImage(source, QTransform()));
@@ -107,6 +108,7 @@ void AbcTest::imageOperations()
     Image b = Image::fromFile("1_32i.fit");
     QCOMPARE(b.type(), Light);
     QCOMPARE(b.temperature(), -20.0016f);
+    QCOMPARE(b.exposure(), 900.0f);
     Image c = Image::fromFile("2_64f.fit");
 
     QCOMPARE(a - a, b - b);

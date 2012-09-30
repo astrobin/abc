@@ -33,6 +33,7 @@ using namespace ABC;
 ImageData::ImageData():
     type(UnknownType),
     temperature(INVALID_TEMPERATURE),
+    exposure(-1),
     pixels(0)
 {
 }
@@ -41,6 +42,7 @@ ImageData::ImageData(const ImageData &other):
     QSharedData(other),
     type(other.type),
     temperature(other.temperature),
+    exposure(other.exposure),
     pixels(0)
 {
     long numPixels = resize(other.size);
@@ -129,6 +131,17 @@ bool ImageData::loadFits(const QString &fileName)
     if (status != 0) {
         temperature = INVALID_TEMPERATURE;
         status = 0;
+    }
+
+    /* Exposure time. */
+    fits_read_key(ff, TFLOAT, "EXPTIME", &exposure, NULL, &status);
+    if (status != 0) {
+        status = 0;
+        fits_read_key(ff, TFLOAT, "EXPOSURE", &exposure, NULL, &status);
+        if (status != 0) {
+            exposure = -1;
+            status = 0;
+        }
     }
 
     fits_close_file(ff, &status);

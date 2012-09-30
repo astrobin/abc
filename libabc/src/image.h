@@ -53,6 +53,7 @@ public:
 
     ImageType type;
     float temperature;
+    float exposure;
     QSize size;
     PixelValue *pixels;
 };
@@ -80,6 +81,8 @@ public:
     bool hasTemperature() const {
         return d->temperature != INVALID_TEMPERATURE;
     }
+
+    float exposure() const { return d->exposure; }
 
     void divide(const Image &other);
 
