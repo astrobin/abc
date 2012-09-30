@@ -32,6 +32,7 @@ using namespace ABC;
 
 ImageData::ImageData():
     type(UnknownType),
+    temperature(INVALID_TEMPERATURE),
     pixels(0)
 {
 }
@@ -39,6 +40,7 @@ ImageData::ImageData():
 ImageData::ImageData(const ImageData &other):
     QSharedData(other),
     type(other.type),
+    temperature(other.temperature),
     pixels(0)
 {
     long numPixels = resize(other.size);
@@ -119,6 +121,14 @@ bool ImageData::loadFits(const QString &fileName)
         type = typeFromString(typeString);
     } else {
         type = UnknownType;
+        status = 0;
+    }
+
+    /* Read the temperature. */
+    fits_read_key(ff, TFLOAT, "CCD-TEMP", &temperature, NULL, &status);
+    if (status != 0) {
+        temperature = INVALID_TEMPERATURE;
+        status = 0;
     }
 
     fits_close_file(ff, &status);

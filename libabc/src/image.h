@@ -26,6 +26,8 @@
 #include <QSharedData>
 #include <QString>
 
+#define INVALID_TEMPERATURE (-300)
+
 namespace ABC {
 
 // This can be changed to double if more precision is needed
@@ -50,6 +52,7 @@ public:
     long resize(const QSize &newSize);
 
     ImageType type;
+    float temperature;
     QSize size;
     PixelValue *pixels;
 };
@@ -72,6 +75,11 @@ public:
     bool isValid() const { return d->size.isValid(); }
     QSize size() const { return d->size; }
     QImage toQImage() const;
+
+    float temperature() const { return d->temperature; }
+    bool hasTemperature() const {
+        return d->temperature != INVALID_TEMPERATURE;
+    }
 
     void divide(const Image &other);
 

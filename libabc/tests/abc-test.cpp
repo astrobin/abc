@@ -106,6 +106,7 @@ void AbcTest::imageOperations()
     Image a = Image::fromFile("32i/0.fit");
     Image b = Image::fromFile("1_32i.fit");
     QCOMPARE(b.type(), Light);
+    QCOMPARE(b.temperature(), -20.0016f);
     Image c = Image::fromFile("2_64f.fit");
 
     QCOMPARE(a - a, b - b);
