@@ -39,7 +39,6 @@ class ImageSetPrivate
 
     QList<Image> images;
     QList<QTransform> transformations;
-    Image divisor;
     Image subtrahend;
     QRect boundingRect;
 };
@@ -52,8 +51,6 @@ Image ImageSetPrivate::uniformAverage() const
     long numPixels = result.d->resize(images[0].size());
     int numImages = images.count();
 
-    const PixelValue *divisorPixels =
-        divisor.isValid() ? divisor.d->pixels : 0;
     const PixelValue *subtrahendPixels =
         subtrahend.isValid() ? subtrahend.d->pixels : 0;
 
@@ -61,13 +58,11 @@ Image ImageSetPrivate::uniformAverage() const
         PixelValue sum = 0;
         PixelValue subtrahendPixel =
             subtrahendPixels != 0 ? subtrahendPixels[i] : 0.0;
-        PixelValue divisorPixel =
-            divisorPixels != 0 ? divisorPixels[i] : 1.0;
 
         foreach (const Image &image, images) {
             sum += image.d->pixels[i];
         }
-        result.d->pixels[i] = sum / numImages / divisorPixel - subtrahendPixel;
+        result.d->pixels[i] = sum / numImages - subtrahendPixel;
     }
 
     return result;
@@ -79,8 +74,6 @@ Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
     long numPixels = result.d->resize(images[0].size());
     int numImages = images.count();
 
-    const PixelValue *divisorPixels =
-        divisor.isValid() ? divisor.d->pixels : 0;
     const PixelValue *subtrahendPixels =
         subtrahend.isValid() ? subtrahend.d->pixels : 0;
 
@@ -88,8 +81,6 @@ Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
         PixelValue sum = 0;
         PixelValue subtrahendPixel =
             subtrahendPixels != 0 ? subtrahendPixels[i] : 0.0;
-        PixelValue divisorPixel =
-            divisorPixels != 0 ? divisorPixels[i] : 1.0;
 
         foreach (const Image &image, images) {
             sum += image.d->pixels[i];
@@ -123,7 +114,7 @@ Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
              * values are all too far from the average */
             resultPixel = average;
         }
-        result.d->pixels[i] = resultPixel / divisorPixel - subtrahendPixel;
+        result.d->pixels[i] = resultPixel - subtrahendPixel;
     }
 
     return result;
@@ -211,15 +202,8 @@ void ImageSet::setSubtractCorrection(const Image &subtrahend)
     d->subtrahend = subtrahend;
 }
 
-void ImageSet::setDivisionCorrection(const Image &divisor)
-{
-    Q_D(ImageSet);
-    d->divisor = divisor;
-}
-
 void ImageSet::clearCorrections()
 {
     Q_D(ImageSet);
     d->subtrahend = Image();
-    d->divisor = Image();
 }
