@@ -48,6 +48,8 @@ public:
     void setSubtractCorrection(const Image &subtrahend);
     void clearCorrections();
 
+    void divide(const Image &divisor);
+
 private:
     QSharedDataPointer<ImageSetPrivate> d;
 };

@@ -73,6 +73,8 @@ public:
     QSize size() const { return d->size; }
     QImage toQImage() const;
 
+    void divide(const Image &other);
+
     bool operator==(const Image &other) const;
     bool operator!=(const Image &other) const;
     Image operator+(const Image &other) const;

@@ -179,6 +179,22 @@ QImage Image::toQImage() const
     return result.copy();
 }
 
+void Image::divide(const Image &other)
+{
+    if (other.d->size != d->size) {
+        qWarning() << "Size mismatch";
+        return;
+    }
+
+    long numPixels = d->size.width() * d->size.height();
+    for (long i = 0; i < numPixels; i++) {
+        // Ignore black pixels
+        if (other.d->pixels[i] > 0) {
+            d->pixels[i] /= other.d->pixels[i];
+        }
+    }
+}
+
 bool Image::operator==(const Image &other) const
 {
     if (other.d->size != d->size) {

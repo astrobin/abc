@@ -208,3 +208,12 @@ void ImageSet::clearCorrections()
 {
     d->subtrahend = Image();
 }
+
+void ImageSet::divide(const Image &divisor)
+{
+    for (QList<Image>::iterator i = d->images.begin();
+         i != d->images.end();
+         i++) {
+        i->divide(divisor);
+    }
+}
