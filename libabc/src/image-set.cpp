@@ -57,11 +57,12 @@ ImageSetPrivate::ImageSetPrivate(const ImageSetPrivate &other):
 Image ImageSetPrivate::uniformAverage() const
 {
     Image result;
-    long numPixels = result.d->resize(images[0].size());
+    long numPixels = result.resize(images[0].size());
     int numImages = images.count();
 
     const PixelValue *subtrahendPixels =
-        subtrahend.isValid() ? subtrahend.d->pixels : 0;
+        subtrahend.isValid() ? subtrahend.constPixels() : 0;
+    PixelValue *resultPixels = result.pixels();
 
     for (long i = 0; i < numPixels; i++) {
         PixelValue sum = 0;
@@ -69,9 +70,9 @@ Image ImageSetPrivate::uniformAverage() const
             subtrahendPixels != 0 ? subtrahendPixels[i] : 0.0;
 
         foreach (const Image &image, images) {
-            sum += image.d->pixels[i];
+            sum += image.pixels()[i];
         }
-        result.d->pixels[i] = sum / numImages - subtrahendPixel;
+        resultPixels[i] = sum / numImages - subtrahendPixel;
     }
 
     return result;
@@ -80,11 +81,12 @@ Image ImageSetPrivate::uniformAverage() const
 Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
 {
     Image result;
-    long numPixels = result.d->resize(images[0].size());
+    long numPixels = result.resize(images[0].size());
     int numImages = images.count();
 
     const PixelValue *subtrahendPixels =
-        subtrahend.isValid() ? subtrahend.d->pixels : 0;
+        subtrahend.isValid() ? subtrahend.constPixels() : 0;
+    PixelValue *resultPixels = result.pixels();
 
     for (long i = 0; i < numPixels; i++) {
         PixelValue sum = 0;
@@ -92,14 +94,14 @@ Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
             subtrahendPixels != 0 ? subtrahendPixels[i] : 0.0;
 
         foreach (const Image &image, images) {
-            sum += image.d->pixels[i];
+            sum += image.pixels()[i];
         }
         PixelValue average = sum / numImages;
 
         // Calculate standard deviation
         sum = 0;
         foreach (const Image &image, images) {
-            sum += powf(image.d->pixels[i] - average, 2);
+            sum += powf(image.pixels()[i] - average, 2);
         }
         PixelValue standardDeviation = sqrtf(sum);
 
@@ -108,7 +110,7 @@ Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
         sum = 0;
         int validImages = 0;
         foreach (const Image &image, images) {
-            PixelValue pixel = image.d->pixels[i];
+            PixelValue pixel = image.pixels()[i];
             if (pixel >= min && pixel <= max) {
                 validImages++;
                 sum += pixel;
@@ -123,7 +125,7 @@ Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
              * values are all too far from the average */
             resultPixel = average;
         }
-        result.d->pixels[i] = resultPixel - subtrahendPixel;
+        resultPixels[i] = resultPixel - subtrahendPixel;
     }
 
     return result;

@@ -23,7 +23,7 @@
 
 #include <QImage>
 #include <QSize>
-#include <QSharedData>
+#include <QSharedDataPointer>
 #include <QString>
 
 #define INVALID_TEMPERATURE (-300)
@@ -41,58 +41,50 @@ enum ImageType {
     Flat,
 };
 
-class ImageData: public QSharedData
-{
-public:
-    ImageData();
-    ImageData(const ImageData &other);
-    ~ImageData();
-
-    bool loadFits(const QString &fileName);
-    long resize(const QSize &newSize);
-
-    ImageType type;
-    float temperature;
-    float exposure;
-    QString cameraModel;
-    QSize size;
-    PixelValue *pixels;
-};
-
 class AbcTest;
 class ImageSetPrivate;
 
+class ImageData;
 class Image
 {
 public:
-    Image() { d = new ImageData; }
-    Image(const Image &other): d(other.d) {}
-    virtual ~Image() {};
+    Image();
+    Image(const Image &other);
+    virtual ~Image();
 
     static Image fromFile(const QString &fileName);
 
     bool load(const QString &fileName);
 
-    ImageType type() const { return d->type; }
-    bool isValid() const { return d->size.isValid(); }
-    QSize size() const { return d->size; }
+    ImageType type() const;
+    bool isValid() const;
+    QSize size() const;
     QImage toQImage() const;
 
-    float temperature() const { return d->temperature; }
-    bool hasTemperature() const {
-        return d->temperature != INVALID_TEMPERATURE;
-    }
+    PixelValue *pixels();
+    const PixelValue *pixels() const;
+    const PixelValue *constPixels() const;
+    PixelValue *line(int l);
+    const PixelValue *line(int l) const;
+    const PixelValue *constLine(int l) const;
 
-    float exposure() const { return d->exposure; }
+    float temperature() const;
+    bool hasTemperature() const;
 
-    QString cameraModel() const { return d->cameraModel; }
+    float exposure() const;
+
+    QString cameraModel() const;
 
     void divide(const Image &other);
 
+    Image &operator=(const Image &other);
     bool operator==(const Image &other) const;
     bool operator!=(const Image &other) const;
     Image operator+(const Image &other) const;
     Image operator-(const Image &other) const;
+
+private:
+    long resize(const QSize &size);
 
 private:
     friend class AbcTest;

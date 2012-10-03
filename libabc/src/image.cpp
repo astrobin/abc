@@ -30,20 +30,64 @@ using namespace ABC;
     (sizeof(PixelValue) == sizeof(float) ? TFLOAT : TDOUBLE)
 #define FITS_RECORD_LENGTH 81
 
+namespace ABC {
+
+class ImageData: public QSharedData
+{
+public:
+    ImageData();
+    ImageData(const ImageData &other);
+    ~ImageData();
+
+    inline bool ensureFitsOpen() const;
+    bool loadFits();
+    long resize(const QSize &newSize);
+
+    long totalPixels() const { return size.width() * size.height(); }
+
+    inline void loadPixels();
+    inline PixelValue *pixelData();
+    inline const PixelValue *constPixelData() const;
+    inline PixelValue *line(int l);
+    inline const PixelValue *constLine(int l) const;
+
+    bool operator==(const Image &other) const;
+    bool operator!=(const Image &other) const;
+    Image operator+(const Image &other) const;
+    Image operator-(const Image &other) const;
+
+    QString fileName;
+    mutable fitsfile *ff;
+    ImageType type;
+    float temperature;
+    float exposure;
+    QString cameraModel;
+    QSize size;
+    mutable PixelValue *lineBuffer;
+    PixelValue *pixels;
+};
+
+} // namespace
+
 ImageData::ImageData():
+    ff(0),
     type(UnknownType),
     temperature(INVALID_TEMPERATURE),
     exposure(-1),
+    lineBuffer(0),
     pixels(0)
 {
 }
 
 ImageData::ImageData(const ImageData &other):
     QSharedData(other),
+    fileName(other.fileName),
+    ff(0),
     type(other.type),
     temperature(other.temperature),
     exposure(other.exposure),
     cameraModel(other.cameraModel),
+    lineBuffer(0),
     pixels(0)
 {
     long numPixels = resize(other.size);
@@ -52,8 +96,14 @@ ImageData::ImageData(const ImageData &other):
 
 ImageData::~ImageData()
 {
+    if (ff != 0) {
+        int status = 0;
+        fits_close_file(ff, &status);
+    }
     delete pixels;
     pixels = 0;
+    delete lineBuffer;
+    lineBuffer = 0;
 }
 
 /* Infer the image type from a string. This can be coming either from a header
@@ -78,14 +128,28 @@ static ImageType typeFromString(const QString typeString)
     }
 }
 
-bool ImageData::loadFits(const QString &fileName)
+bool ImageData::ensureFitsOpen() const
 {
-    fitsfile *ff;
+    if (ff == 0) {
+        int status = 0;
+        fits_open_image(&ff, fileName.toUtf8().constData(),
+                        READWRITE, &status);
+        if (status != 0) return false;
+    }
+
+    return true;
+}
+
+bool ImageData::loadFits()
+{
     int status = 0;
 
-    fits_open_image(&ff, fileName.toUtf8().constData(),
-                    READWRITE, &status);
-    if (status != 0) return false;
+    if (ff != 0) {
+        fits_close_file(ff, &status);
+        status = 0;
+    }
+
+    if (!ensureFitsOpen()) return false;
 
     int numAxes = 0;
     fits_get_img_dim(ff, &numAxes, &status);
@@ -154,7 +218,6 @@ bool ImageData::loadFits(const QString &fileName)
         status = 0;
     }
 
-    fits_close_file(ff, &status);
     return true;
 }
 
@@ -169,6 +232,94 @@ long ImageData::resize(const QSize &newSize)
     return numPixels;
 }
 
+void ImageData::loadPixels()
+{
+    if (!ensureFitsOpen()) return;
+
+    long numPixels = totalPixels();
+    Q_ASSERT(pixels == 0);
+    pixels = new PixelValue[numPixels];
+
+    long firstPixels[2];
+    firstPixels[0] = firstPixels[1] = 1;
+    int status = 0;
+    fits_read_pix(ff, PIXEL_VALUE_FITS_TYPE, firstPixels, numPixels,
+                  NULL, pixels, NULL, &status);
+    if (status != 0) {
+        delete pixels;
+        pixels = 0;
+        status = 0;
+    }
+
+    /* We won't need to access the fits file anymore */
+    fits_close_file(ff, &status);
+    ff = 0;
+
+    /* or the line buffer either */
+    delete lineBuffer;
+    lineBuffer = 0;
+}
+
+PixelValue *ImageData::pixelData()
+{
+    if (pixels == 0) loadPixels();
+    return pixels;
+}
+
+const PixelValue *ImageData::constPixelData() const
+{
+    return pixels;
+}
+
+PixelValue *ImageData::line(int l)
+{
+    return pixelData() + l * size.width();
+}
+
+const PixelValue *ImageData::constLine(int l) const
+{
+    int width = size.width();
+
+    /* If the data is already loaded, just return it */
+    if (pixels != 0) return pixels + l * width;
+
+    /* TODO: support raw files */
+    if (!ensureFitsOpen()) return 0;
+
+    long numPixels = size.width();
+    if (lineBuffer == 0) {
+        lineBuffer = new PixelValue[numPixels];
+    }
+
+    int status = 0;
+    long firstPixels[2];
+    firstPixels[0] = 1;
+    firstPixels[1] = l;
+    fits_read_pix(ff, PIXEL_VALUE_FITS_TYPE, firstPixels, numPixels,
+                  NULL, lineBuffer, NULL, &status);
+    if (status != 0) {
+        delete lineBuffer;
+        lineBuffer = 0;
+        status = 0;
+    }
+
+    return lineBuffer;
+}
+
+Image::Image():
+    d(new ImageData)
+{
+}
+
+Image::Image(const Image &other):
+    d(other.d)
+{
+}
+
+Image::~Image()
+{
+}
+
 Image Image::fromFile(const QString &fileName)
 {
     Image image;
@@ -178,8 +329,10 @@ Image Image::fromFile(const QString &fileName)
 
 bool Image::load(const QString &fileName)
 {
+    d->fileName = fileName;
+
     // TODO: if loading a FITS fail, fallback to a raw file
-    bool ok = d->loadFits(fileName);
+    bool ok = d->loadFits();
 
     if (ok && d->type == UnknownType) {
         QFileInfo fi(fileName);
@@ -187,6 +340,21 @@ bool Image::load(const QString &fileName)
     }
 
     return ok;
+}
+
+ImageType Image::type() const
+{
+    return d->type;
+}
+
+bool Image::isValid() const
+{
+    return d->size.isValid();
+}
+
+QSize Image::size() const
+{
+    return d->size;
 }
 
 QImage Image::toQImage() const
@@ -201,15 +369,66 @@ QImage Image::toQImage() const
     int width = d->size.width();
     int height = d->size.height();
     int numPixels = width * height;
+    const PixelValue *thisPixels = constPixels();
     QByteArray pixels;
     pixels.resize(numPixels);
     for (int i = 0; i < numPixels; i++) {
-        pixels[i] = (unsigned char)(d->pixels[i] * 255);
+        pixels[i] = (unsigned char)(thisPixels[i] * 255);
     }
     QImage result((unsigned char *)pixels.constData(),
                   width, height, QImage::Format_Indexed8);
     result.setColorTable(greyScale);
     return result.copy();
+}
+
+PixelValue *Image::pixels()
+{
+    return d->pixelData();
+}
+
+const PixelValue *Image::pixels() const
+{
+    return d->constPixelData();
+}
+
+const PixelValue *Image::constPixels() const
+{
+    return d->constPixelData();
+}
+
+PixelValue *Image::line(int l)
+{
+    return d->line(l);
+}
+
+const PixelValue *Image::line(int l) const
+{
+    return d->constLine(l);
+}
+
+const PixelValue *Image::constLine(int l) const
+{
+    return d->constLine(l);
+}
+
+float Image::temperature() const
+{
+    return d->temperature;
+}
+
+bool Image::hasTemperature() const
+{
+    return d->temperature != INVALID_TEMPERATURE;
+}
+
+float Image::exposure() const
+{
+    return d->exposure;
+}
+
+QString Image::cameraModel() const
+{
+    return d->cameraModel;
 }
 
 void Image::divide(const Image &other)
@@ -220,12 +439,22 @@ void Image::divide(const Image &other)
     }
 
     long numPixels = d->size.width() * d->size.height();
+    PixelValue *thisPixels = pixels();
+    const PixelValue *otherPixels = other.constPixels();
     for (long i = 0; i < numPixels; i++) {
         // Ignore black pixels
-        if (other.d->pixels[i] > 0) {
-            d->pixels[i] /= other.d->pixels[i];
+        if (otherPixels[i] > 0) {
+            thisPixels[i] /= otherPixels[i];
         }
     }
+}
+
+Image &Image::operator=(const Image &other)
+{
+    if (this != &other) {
+        d = other.d;
+    }
+    return *this;
 }
 
 bool Image::operator==(const Image &other) const
@@ -235,8 +464,10 @@ bool Image::operator==(const Image &other) const
     }
 
     long numPixels = d->size.width() * d->size.height();
+    const PixelValue *thisPixels = constPixels();
+    const PixelValue *otherPixels = other.constPixels();
     for (long i = 0; i < numPixels; i++) {
-        if (!qFuzzyCompare(d->pixels[i], other.d->pixels[i])) {
+        if (!qFuzzyCompare(thisPixels[i], otherPixels[i])) {
             return false;
         }
     }
@@ -257,8 +488,11 @@ Image Image::operator+(const Image &other) const
 
     Image result;
     long numPixels = result.d->resize(d->size);
+    PixelValue *resultPixels = result.pixels();
+    const PixelValue *thisPixels = constPixels();
+    const PixelValue *otherPixels = other.constPixels();
     for (long i = 0; i < numPixels; i++) {
-        result.d->pixels[i] = d->pixels[i] + other.d->pixels[i];
+        resultPixels[i] = thisPixels[i] + otherPixels[i];
     }
     return result;
 }
@@ -272,8 +506,16 @@ Image Image::operator-(const Image &other) const
 
     Image result;
     long numPixels = result.d->resize(d->size);
+    PixelValue *resultPixels = result.pixels();
+    const PixelValue *thisPixels = constPixels();
+    const PixelValue *otherPixels = other.constPixels();
     for (long i = 0; i < numPixels; i++) {
-        result.d->pixels[i] = d->pixels[i] - other.d->pixels[i];
+        resultPixels[i] = thisPixels[i] - otherPixels[i];
     }
     return result;
+}
+
+long Image::resize(const QSize &size)
+{
+    return d->resize(size);
 }

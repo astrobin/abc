@@ -66,8 +66,10 @@ void AbcTest::imageSetAverage()
     QCOMPARE(average.size(), source.size());
 
     long numPixels = average.size().width() * average.size().height();
+    const PixelValue *sourcePixels = source.pixels();
+    const PixelValue *averagePixels = average.pixels();
     for (long i = 0; i < numPixels; i++) {
-        QVERIFY(qFuzzyCompare(average.d->pixels[i], source.d->pixels[i]));
+        QVERIFY(qFuzzyCompare(averagePixels[i], sourcePixels[i]));
     }
 }
 
