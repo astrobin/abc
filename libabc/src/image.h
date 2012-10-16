@@ -82,6 +82,7 @@ public:
     bool operator!=(const Image &other) const;
     Image operator+(const Image &other) const;
     Image operator-(const Image &other) const;
+    Image &operator-=(const Image &other);
 
 private:
     long resize(const QSize &size);

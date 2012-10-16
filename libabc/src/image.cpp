@@ -515,6 +515,23 @@ Image Image::operator-(const Image &other) const
     return result;
 }
 
+Image &Image::operator-=(const Image &other)
+{
+    if (other.d->size != d->size) {
+        qWarning() << "Size mismatch";
+        return *this;
+    }
+
+    long numPixels = d->size.width() * d->size.height();
+    PixelValue *thisPixels = pixels();
+    const PixelValue *otherPixels = other.constPixels();
+    for (long i = 0; i < numPixels; i++) {
+        thisPixels[i] -= otherPixels[i];
+        if (thisPixels[i] < 0) thisPixels[i] = 0;
+    }
+    return *this;
+}
+
 long Image::resize(const QSize &size)
 {
     return d->resize(size);

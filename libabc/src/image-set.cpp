@@ -57,22 +57,30 @@ ImageSetPrivate::ImageSetPrivate(const ImageSetPrivate &other):
 Image ImageSetPrivate::uniformAverage() const
 {
     Image result;
-    long numPixels = result.resize(images[0].size());
+    QSize size = images[0].size();
+    result.resize(size);
     int numImages = images.count();
 
-    const PixelValue *subtrahendPixels =
-        subtrahend.isValid() ? subtrahend.constPixels() : 0;
-    PixelValue *resultPixels = result.pixels();
-
-    for (long i = 0; i < numPixels; i++) {
-        PixelValue sum = 0;
-        PixelValue subtrahendPixel =
-            subtrahendPixels != 0 ? subtrahendPixels[i] : 0.0;
+    int width = size.width();
+    PixelValue sumBuffer[width];
+    for (int line = 0; line < size.height(); line++) {
+        memset(sumBuffer, 0, sizeof(sumBuffer));
 
         foreach (const Image &image, images) {
-            sum += image.pixels()[i];
+            const PixelValue *imagePixels = image.constLine(line);
+            for (int i = 0; i < width; i++) {
+                sumBuffer[i] += imagePixels[i];
+            }
         }
-        resultPixels[i] = sum / numImages - subtrahendPixel;
+
+        PixelValue *resultPixels = result.line(line);
+        for (int i = 0; i < width; i++) {
+            resultPixels[i] = sumBuffer[i] / numImages;
+        }
+    }
+
+    if (subtrahend.isValid()) {
+        result -= subtrahend;
     }
 
     return result;
@@ -81,51 +89,63 @@ Image ImageSetPrivate::uniformAverage() const
 Image ImageSetPrivate::uniformSigmaClip(float sigmaFactor) const
 {
     Image result;
-    long numPixels = result.resize(images[0].size());
+    QSize size = images[0].size();
+    result.resize(size);
     int numImages = images.count();
 
-    const PixelValue *subtrahendPixels =
-        subtrahend.isValid() ? subtrahend.constPixels() : 0;
-    PixelValue *resultPixels = result.pixels();
-
-    for (long i = 0; i < numPixels; i++) {
-        PixelValue sum = 0;
-        PixelValue subtrahendPixel =
-            subtrahendPixels != 0 ? subtrahendPixels[i] : 0.0;
-
-        foreach (const Image &image, images) {
-            sum += image.pixels()[i];
+    int width = size.width();
+    QVector<const PixelValue*> imagesData(numImages);
+    for (int line = 0; line < size.height(); line++) {
+        /* Cache the line buffers into a QVector for faster access */
+        for (int i = 0; i < numImages; i++) {
+            imagesData[i] = images[i].constLine(line);
         }
-        PixelValue average = sum / numImages;
 
-        // Calculate standard deviation
-        sum = 0;
-        foreach (const Image &image, images) {
-            sum += powf(image.pixels()[i] - average, 2);
-        }
-        PixelValue standardDeviation = sqrtf(sum);
+        PixelValue *resultPixels = result.line(line);
 
-        PixelValue min = average - sigmaFactor * standardDeviation;
-        PixelValue max = average + sigmaFactor * standardDeviation;
-        sum = 0;
-        int validImages = 0;
-        foreach (const Image &image, images) {
-            PixelValue pixel = image.pixels()[i];
-            if (pixel >= min && pixel <= max) {
-                validImages++;
-                sum += pixel;
+        for (int x = 0; x < width; x++) {
+            PixelValue sum = 0;
+            for (int i = 0; i < numImages; i++) {
+                sum += imagesData[i][x];
+            }
+
+            PixelValue average = sum / numImages;
+
+            // Calculate standard deviation
+            sum = 0;
+            for (int i = 0; i < numImages; i++) {
+                sum += powf(imagesData[i][x] - average, 2);
+            }
+            PixelValue standardDeviation = sqrtf(sum);
+
+            /* Consider only those pixels which don't differ too much from the
+             * average. */
+            PixelValue min = average - sigmaFactor * standardDeviation;
+            PixelValue max = average + sigmaFactor * standardDeviation;
+            sum = 0;
+            int validImages = 0;
+            for (int i = 0; i < numImages; i++) {
+                PixelValue pixel = imagesData[i][x];
+                if (pixel >= min && pixel <= max) {
+                    validImages++;
+                    sum += pixel;
+                }
+            }
+
+            /* The resulting pixel is the average of those pixels with a value
+             * within the accepted range */
+            if (validImages > 0) {
+                resultPixels[x] = sum / validImages;
+            } else {
+                /* This can happen for too low values of sigmaFactor, or when pixel
+                 * values are all too far from the average */
+                resultPixels[x] = average;
             }
         }
+    }
 
-        PixelValue resultPixel;
-        if (validImages > 0) {
-            resultPixel = sum / validImages;
-        } else {
-            /* This can happen for too low values of sigmaFactor, or when pixel
-             * values are all too far from the average */
-            resultPixel = average;
-        }
-        resultPixels[i] = resultPixel - subtrahendPixel;
+    if (subtrahend.isValid()) {
+        result -= subtrahend;
     }
 
     return result;
