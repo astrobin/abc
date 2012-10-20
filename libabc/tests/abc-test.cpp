@@ -20,6 +20,7 @@
 
 #include "abc-test.h"
 
+#include "configuration.h"
 #include "image-set.h"
 #include "image.h"
 
@@ -127,6 +128,16 @@ void AbcTest::imageOperations()
     QCOMPARE(sum + sum, ab + bc + ca);
     QCOMPARE(ab + bc, sum + b);
     QCOMPARE(ab + bc - b, sum);
+}
+
+void AbcTest::configuration()
+{
+    Configuration *conf = Configuration::instance();
+    QVERIFY(conf != 0);
+
+    QString calibrationFilesDir = conf->calibrationFilesDir();
+    QVERIFY(!calibrationFilesDir.isEmpty());
+    qDebug() << "Calibration files dir:" << calibrationFilesDir;
 }
 
 QTEST_MAIN(AbcTest)

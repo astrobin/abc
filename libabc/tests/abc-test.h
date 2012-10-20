@@ -37,6 +37,8 @@ private Q_SLOTS:
     void imageSetAverage();
     void imageSetBounds();
     void imageOperations();
+
+    void configuration();
 };
 
 }; // namespace
