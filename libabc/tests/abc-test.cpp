@@ -138,6 +138,8 @@ void AbcTest::configuration()
     QString calibrationFilesDir = conf->calibrationFilesDir();
     QVERIFY(!calibrationFilesDir.isEmpty());
     qDebug() << "Calibration files dir:" << calibrationFilesDir;
+
+    QCOMPARE(conf->calibrationMaxTemperatureDiff(), 1.0f);
 }
 
 QTEST_MAIN(AbcTest)

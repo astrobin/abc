@@ -33,6 +33,7 @@ public:
     static Configuration *instance();
 
     QString calibrationFilesDir() const;
+    float calibrationMaxTemperatureDiff() const;
 
 private:
     Configuration();

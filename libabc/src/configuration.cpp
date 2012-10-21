@@ -27,6 +27,8 @@
 using namespace ABC;
 
 static const QLatin1String keyCalibrationFilesDir("CalibrationFilesDir");
+static const QLatin1String keyCalibrationMaxTemperatureDiff("CalibrationMax"
+                                                            "TemperatureDiff");
 
 static Configuration *configurationInstance = 0;
 
@@ -77,4 +79,10 @@ QString Configuration::calibrationFilesDir() const
 
     return QDesktopServices::storageLocation(QDesktopServices::DataLocation) +
         QLatin1String("/CalibrationFiles/");
+}
+
+float Configuration::calibrationMaxTemperatureDiff() const
+{
+    Q_D(const Configuration);
+    return d->settings.value(keyCalibrationMaxTemperatureDiff, 1.0).toFloat();
 }
