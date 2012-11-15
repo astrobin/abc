@@ -40,6 +40,7 @@ public:
     bool addImage(const Image &image);
     bool addImage(const Image &image, const QTransform &transform);
 
+    bool isEmpty() const;
     QRect boundingRect() const;
 
     Image average() const;

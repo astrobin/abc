@@ -83,7 +83,9 @@ void AbcTest::imageSetBounds()
     QCOMPARE(source.exposure(), 83.2f);
 
     ImageSet images;
+    QVERIFY(images.isEmpty());
     QVERIFY(images.addImage(source, QTransform()));
+    QVERIFY(!images.isEmpty());
 
     QRect imageRect = QRect(QPoint(0, 0), source.size());
     QRect expectedBounds = imageRect;

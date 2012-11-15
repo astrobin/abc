@@ -196,6 +196,11 @@ bool ImageSet::addImage(const Image &image, const QTransform &transform)
     return true;
 }
 
+bool ImageSet::isEmpty() const
+{
+    return d->images.isEmpty();
+}
+
 QRect ImageSet::boundingRect() const
 {
     return d->boundingRect;
