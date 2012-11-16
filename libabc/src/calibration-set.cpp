@@ -38,17 +38,13 @@ class CalibrationSetPrivate
     void load();
     void loadImageSets(const QDir &baseDir);
     void loadImageSet(const QDir &baseDir,
-                      const QString &subDir,
-                      ImageSet &set);
+                      Calibration::FileType fileType);
     inline void findClosestTemperatures(int goalTemperature,
                                         const QList<int> &temperatures,
                                         int &lower, int &upper);
 
 private:
-    ImageSet offsets;
-    ImageSet darks;
-    ImageSet darkFlats;
-    ImageSet flats;
+    ImageSet sets[Calibration::NumFileTypes];
     QString camera;
     float temperature;
     float exposure;
@@ -136,17 +132,34 @@ void CalibrationSetPrivate::load()
 
 void CalibrationSetPrivate::loadImageSets(const QDir &baseDir)
 {
-    loadImageSet(baseDir, "Offsets", offsets);
-    loadImageSet(baseDir, "Darks", darks);
-    loadImageSet(baseDir, "DarkFlats", darkFlats);
-    loadImageSet(baseDir, "Flats", flats);
+    loadImageSet(baseDir, Calibration::Offset);
+    loadImageSet(baseDir, Calibration::Dark);
+    loadImageSet(baseDir, Calibration::DarkFlat);
+    loadImageSet(baseDir, Calibration::Flat);
+}
+
+static QString directoryFromType(Calibration::FileType fileType)
+{
+    switch (fileType) {
+    case Calibration::Offset:
+        return "Offsets";
+    case Calibration::Dark:
+        return "Darks";
+    case Calibration::DarkFlat:
+        return "DarkFlats";
+    case Calibration::Flat:
+        return "Flats";
+    default:
+        qCritical() << "Calibration file type unknown" << fileType;
+        return "";
+    }
 }
 
 void CalibrationSetPrivate::loadImageSet(const QDir &baseDir,
-                                         const QString &subDir,
-                                         ImageSet &set)
+                                         Calibration::FileType fileType)
 {
     QDir dir(baseDir);
+    QString subDir = directoryFromType(fileType);
     if (!dir.cd(subDir)) {
         DEBUG() << "Calibration directory not found:" << subDir;
         return;
@@ -157,7 +170,7 @@ void CalibrationSetPrivate::loadImageSet(const QDir &baseDir,
         Image image = Image::fromFile(fileName);
 
         if (image.isValid()) {
-            set.addImage(image);
+            sets[fileType].addImage(image);
         }
     }
 }

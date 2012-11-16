@@ -25,6 +25,16 @@
 
 namespace ABC {
 
+namespace Calibration {
+    enum FileType {
+        Offset,
+        Dark,
+        DarkFlat,
+        Flat,
+        NumFileTypes
+    };
+};
+
 class CalibrationSetPrivate;
 class CalibrationSet
 {
@@ -34,10 +44,11 @@ public:
 
     void load(const Image &image);
 
-    ImageSet offsets() const;
-    ImageSet darks() const;
-    ImageSet darkFlats() const;
-    ImageSet flats() const;
+    ImageSet set(Calibration::FileType fileType) const;
+    ImageSet offsets() const { return set(Calibration::Offset); }
+    ImageSet darks() const { return set(Calibration::Dark); }
+    ImageSet darkFlats() const { return set(Calibration::DarkFlat); }
+    ImageSet flats() const { return set(Calibration::Flat); }
 
 private:
     CalibrationSetPrivate *d_ptr;
