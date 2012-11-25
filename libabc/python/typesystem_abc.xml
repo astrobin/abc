@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<typesystem package="PyABC">
+  <load-typesystem name="typesystem_core.xml" generate="no" />
+  <namespace-type name="ABC" generate="no">
+    <enum-type name="ImageType"/>
+    <object-type name="Image" />
+    <object-type name="ImageSet" />
+  </namespace-type>
+</typesystem>
+
