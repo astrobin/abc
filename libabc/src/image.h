@@ -52,9 +52,10 @@ public:
     Image(const Image &other);
     virtual ~Image();
 
-    static Image fromFile(const QString &fileName);
+    static Image fromFile(const QString &fileName,
+                          const QString &label = QString());
 
-    bool load(const QString &fileName);
+    bool load(const QString &fileName, const QString &label = QString());
 
     ImageType type() const;
     bool isValid() const;

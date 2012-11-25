@@ -320,14 +320,14 @@ Image::~Image()
 {
 }
 
-Image Image::fromFile(const QString &fileName)
+Image Image::fromFile(const QString &fileName, const QString &label)
 {
     Image image;
-    image.load(fileName);
+    image.load(fileName, label);
     return image;
 }
 
-bool Image::load(const QString &fileName)
+bool Image::load(const QString &fileName, const QString &label)
 {
     d->fileName = fileName;
 
@@ -335,8 +335,12 @@ bool Image::load(const QString &fileName)
     bool ok = d->loadFits();
 
     if (ok && d->type == UnknownType) {
-        QFileInfo fi(fileName);
-        d->type = typeFromString(fi.baseName());
+        if (!label.isEmpty()) {
+            d->type = typeFromString(label);
+        } else {
+            QFileInfo fi(fileName);
+            d->type = typeFromString(fi.baseName());
+        }
     }
 
     return ok;
