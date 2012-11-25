@@ -36,3 +36,6 @@ SOURCES += \
 
 target.path = $${PYSIDE_PYTHONPATH}
 INSTALLS += target
+
+check.commands = "LD_LIBRARY_PATH=../src:$LD_LIBRARY_PATH ./abc-test.py"
+QMAKE_EXTRA_TARGETS *= check
