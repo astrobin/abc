@@ -28,6 +28,8 @@
 
 #define INVALID_TEMPERATURE (-300)
 
+class QDateTime;
+
 namespace ABC {
 
 // This can be changed to double if more precision is needed
@@ -75,6 +77,8 @@ public:
     float exposure() const;
 
     QString cameraModel() const;
+
+    QDateTime observationDate() const;
 
     void divide(const Image &other);
 

@@ -3,7 +3,22 @@
   <load-typesystem name="typesystem_core.xml" generate="no" />
   <namespace-type name="ABC" generate="no">
     <enum-type name="ImageType"/>
-    <object-type name="Image" />
+    <object-type name="Image">
+      <modify-function signature="observationDate()const">
+        <inject-code class="target" position="end">
+        QDate date = %0.date();
+        QTime time = %0.time();
+        if (!PyDateTimeAPI) PyDateTime_IMPORT;
+        %PYARG_0 = PyDateTime_FromDateAndTime(date.year(), date.month(), date.day(), time.hour(), time.minute(), time.second(), time.msec()*1000);
+        </inject-code>
+        <modify-argument index="return">
+          <replace-type modified-type="PyObject"/>
+        </modify-argument>
+      </modify-function>
+      <extra-includes>
+        <include file-name="datetime.h" location="global"/>
+      </extra-includes>
+    </object-type>
     <object-type name="ImageSet" />
   </namespace-type>
 </typesystem>

@@ -21,6 +21,7 @@
 #include "debug.h"
 #include "image.h"
 
+#include <QDateTime>
 #include <QFileInfo>
 #include <fitsio.h>
 
@@ -62,6 +63,7 @@ public:
     float temperature;
     float exposure;
     QString cameraModel;
+    QDateTime observationDate;
     QSize size;
     mutable PixelValue *lineBuffer;
     PixelValue *pixels;
@@ -87,6 +89,7 @@ ImageData::ImageData(const ImageData &other):
     temperature(other.temperature),
     exposure(other.exposure),
     cameraModel(other.cameraModel),
+    observationDate(other.observationDate),
     lineBuffer(0),
     pixels(0)
 {
@@ -215,6 +218,15 @@ bool ImageData::loadFits()
         cameraModel = QString::fromLatin1(headerRecord);
     } else {
         cameraModel = QString();
+        status = 0;
+    }
+
+    /* Observation date. */
+    fits_read_key(ff, TSTRING, "DATE-OBS", headerRecord, NULL, &status);
+    if (status == 0) {
+        observationDate = QDateTime::fromString(headerRecord, Qt::ISODate);
+    } else {
+        observationDate = QDateTime();
         status = 0;
     }
 
@@ -433,6 +445,11 @@ float Image::exposure() const
 QString Image::cameraModel() const
 {
     return d->cameraModel;
+}
+
+QDateTime Image::observationDate() const
+{
+    return d->observationDate;
 }
 
 void Image::divide(const Image &other)
