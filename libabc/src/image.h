@@ -89,6 +89,9 @@ public:
     Image operator-(const Image &other) const;
     Image &operator-=(const Image &other);
 
+    void setStandardDeviationEpsilon(float standardDeviationEps);
+    void setMeanEpsilon(float meanEps);
+
 private:
     long resize(const QSize &size);
 

@@ -24,6 +24,8 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <fitsio.h>
+#include <libraw.h>
+#include <math.h>
 
 using namespace ABC;
 
@@ -33,8 +35,21 @@ using namespace ABC;
 
 namespace ABC {
 
+struct ImageBackend {
+    bool (ImageData::*load) ();
+    bool (ImageData::*loadPixels) ();
+    bool (ImageData::*loadLine) (int line) const;
+    void (ImageData::*close) ();
+};
+
 class ImageData: public QSharedData
 {
+    enum BackendType {
+        BackendUnknown = 0,
+        BackendFits,
+        BackendRaw,
+    };
+
 public:
     ImageData();
     ImageData(const ImageData &other);
@@ -42,9 +57,17 @@ public:
 
     inline bool ensureFitsOpen() const;
     bool loadFits();
+    bool loadPixelsFits();
+    bool loadLineFits(int l) const;
+    void closeFits();
+
+    bool loadRaw();
+    void closeRaw();
+
     long resize(const QSize &newSize);
 
     long totalPixels() const { return size.width() * size.height(); }
+
 
     inline void loadPixels();
     inline PixelValue *pixelData();
@@ -59,6 +82,8 @@ public:
 
     QString fileName;
     mutable fitsfile *ff;
+    mutable LibRaw *raw;
+    const ImageBackend *backend;
     ImageType type;
     float temperature;
     float exposure;
@@ -67,17 +92,41 @@ public:
     QSize size;
     mutable PixelValue *lineBuffer;
     PixelValue *pixels;
+
+    /* temporary parameters */
+    float meanEps;
+    float standardDeviationEps;
+};
+
+static const ImageBackend backends[] = {
+    {
+        &ImageData::loadFits,
+        &ImageData::loadPixelsFits,
+        &ImageData::loadLineFits,
+        &ImageData::closeFits,
+    },
+    {
+        &ImageData::loadRaw,
+        0,
+        0,
+        &ImageData::closeRaw,
+    },
+    { 0, 0, 0, 0 }
 };
 
 } // namespace
 
 ImageData::ImageData():
     ff(0),
+    raw(0),
+    backend(0),
     type(UnknownType),
     temperature(INVALID_TEMPERATURE),
     exposure(-1),
     lineBuffer(0),
-    pixels(0)
+    pixels(0),
+    meanEps(0.2),
+    standardDeviationEps(0.2)
 {
 }
 
@@ -85,13 +134,17 @@ ImageData::ImageData(const ImageData &other):
     QSharedData(other),
     fileName(other.fileName),
     ff(0),
+    raw(0),
+    backend(other.backend),
     type(other.type),
     temperature(other.temperature),
     exposure(other.exposure),
     cameraModel(other.cameraModel),
     observationDate(other.observationDate),
     lineBuffer(0),
-    pixels(0)
+    pixels(0),
+    meanEps(other.meanEps),
+    standardDeviationEps(other.standardDeviationEps)
 {
     long numPixels = resize(other.size);
     memcpy(pixels, other.pixels, numPixels * sizeof(PixelValue));
@@ -99,9 +152,8 @@ ImageData::ImageData(const ImageData &other):
 
 ImageData::~ImageData()
 {
-    if (ff != 0) {
-        int status = 0;
-        fits_close_file(ff, &status);
+    if (backend != 0) {
+        (this->*(backend->close))();
     }
     delete pixels;
     pixels = 0;
@@ -233,6 +285,108 @@ bool ImageData::loadFits()
     return true;
 }
 
+void ImageData::closeFits()
+{
+    if (ff != 0) {
+        int status = 0;
+        fits_close_file(ff, &status);
+    }
+}
+
+bool ImageData::loadLineFits(int l) const
+{
+    if (!ensureFitsOpen()) return 0;
+
+    int status = 0;
+    long firstPixels[2];
+    firstPixels[0] = 1;
+    firstPixels[1] = l;
+    fits_read_pix(ff, PIXEL_VALUE_FITS_TYPE, firstPixels, size.width(),
+                  NULL, lineBuffer, NULL, &status);
+    if (status != 0) {
+        delete lineBuffer;
+        lineBuffer = 0;
+        return false;
+    }
+
+    return true;
+}
+
+bool ImageData::loadRaw()
+{
+    delete raw;
+    raw = new LibRaw;
+
+    if (raw->open_file(fileName.toUtf8().constData()) != LIBRAW_SUCCESS) {
+        delete raw;
+        raw = 0;
+        return false;
+    }
+
+    int width = raw->imgdata.sizes.width;
+    int height = raw->imgdata.sizes.height;
+    long numPixels = resize(QSize(width, height));
+
+    /* TODO: detect the image type */
+    type = UnknownType;
+
+    /* Temperature of raw files is unknown. */
+    temperature = INVALID_TEMPERATURE;
+
+    /* Exposure time. */
+    exposure = raw->imgdata.other.shutter;
+
+    /* Camera model. */
+    cameraModel = QString("%1 %2").
+        arg(QString::fromUtf8(raw->imgdata.idata.make)).
+        arg(QString::fromUtf8(raw->imgdata.idata.model));
+
+    /* Observation date. */
+    observationDate = QDateTime::fromTime_t(raw->imgdata.other.timestamp);
+
+    /* Read the image pixels. */
+    raw->unpack();
+
+    ushort *rawData = raw->imgdata.rawdata.raw_image;
+    unsigned maximum = raw->imgdata.rawdata.color.maximum;
+    /* while at it, compute the mean as well */
+    PixelValue sum = 0;
+    for (int i = 0; i < numPixels; i++) {
+        ushort pixel = rawData[i];
+        if (pixel >= maximum) {
+            /* It's not completely clear to me why this can happen; it is
+             * probably due to the tone curve.
+             */
+            pixels[i] = 1.0;
+        } else {
+            pixels[i] = PixelValue(pixel) / maximum;
+        }
+        sum += pixels[i];
+    }
+    PixelValue mean = sum / numPixels;
+
+    /* calculate standard deviation */
+    sum = 0;
+    for (int i = 0; i < numPixels; i++) {
+        sum += powf(pixels[i] - mean, 2);
+    }
+    PixelValue standardDeviation = sqrtf(sum);
+
+    if (standardDeviation <= standardDeviationEps) {
+        type = Light;
+    } else if (exposure <= 1.0/500) {
+        type = Offset;
+    } else if (mean <= meanEps) {
+        type = Dark;
+    } else {
+        type = Flat;
+    }
+
+    DEBUG() << "Mean:" << mean << "Std.dev.:" << standardDeviation <<
+        "=>" << type;
+    return true;
+}
+
 long ImageData::resize(const QSize &newSize)
 {
     long numPixels = newSize.width() * newSize.height();
@@ -244,12 +398,19 @@ long ImageData::resize(const QSize &newSize)
     return numPixels;
 }
 
-void ImageData::loadPixels()
+void ImageData::closeRaw()
 {
-    if (!ensureFitsOpen()) return;
+    if (raw != 0) {
+        delete raw;
+        raw = 0;
+    }
+}
+
+bool ImageData::loadPixelsFits()
+{
+    if (!ensureFitsOpen()) return false;
 
     long numPixels = totalPixels();
-    Q_ASSERT(pixels == 0);
     pixels = new PixelValue[numPixels];
 
     long firstPixels[2];
@@ -266,8 +427,16 @@ void ImageData::loadPixels()
     /* We won't need to access the fits file anymore */
     fits_close_file(ff, &status);
     ff = 0;
+    return pixels != 0;
+}
 
-    /* or the line buffer either */
+void ImageData::loadPixels()
+{
+    Q_ASSERT(pixels == 0);
+    if (backend->loadPixels == 0 ||
+        !(this->*(backend->loadPixels))()) return;
+
+    /* The line buffer won't be needed anymore */
     delete lineBuffer;
     lineBuffer = 0;
 }
@@ -295,25 +464,12 @@ const PixelValue *ImageData::constLine(int l) const
     /* If the data is already loaded, just return it */
     if (pixels != 0) return pixels + l * width;
 
-    /* TODO: support raw files */
-    if (!ensureFitsOpen()) return 0;
-
-    long numPixels = size.width();
     if (lineBuffer == 0) {
-        lineBuffer = new PixelValue[numPixels];
+        lineBuffer = new PixelValue[width];
     }
 
-    int status = 0;
-    long firstPixels[2];
-    firstPixels[0] = 1;
-    firstPixels[1] = l;
-    fits_read_pix(ff, PIXEL_VALUE_FITS_TYPE, firstPixels, numPixels,
-                  NULL, lineBuffer, NULL, &status);
-    if (status != 0) {
-        delete lineBuffer;
-        lineBuffer = 0;
-        status = 0;
-    }
+    if (backend->loadLine == 0 ||
+        !(this->*(backend->loadLine))(l)) return 0;
 
     return lineBuffer;
 }
@@ -343,8 +499,14 @@ bool Image::load(const QString &fileName, const QString &label)
 {
     d->fileName = fileName;
 
-    // TODO: if loading a FITS fail, fallback to a raw file
-    bool ok = d->loadFits();
+    bool ok = false;
+    for (const ImageBackend *backend = backends; backend->load != 0; backend++) {
+        ok = (d->*(backend->load))();
+        if (ok) {
+            d->backend = backend;
+            break;
+        }
+    }
 
     if (ok && d->type == UnknownType) {
         if (!label.isEmpty()) {
@@ -551,6 +713,16 @@ Image &Image::operator-=(const Image &other)
         if (thisPixels[i] < 0) thisPixels[i] = 0;
     }
     return *this;
+}
+
+void Image::setStandardDeviationEpsilon(float standardDeviationEps)
+{
+    d->standardDeviationEps = standardDeviationEps;
+}
+
+void Image::setMeanEpsilon(float meanEps)
+{
+    d->meanEps = meanEps;
 }
 
 long Image::resize(const QSize &size)

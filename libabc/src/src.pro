@@ -3,6 +3,12 @@ include(../../common-config.pri)
 TEMPLATE = lib
 TARGET = abc
 
+CONFIG += \
+    link_pkgconfig
+
+PKGCONFIG += \
+    libraw
+
 LIBS += -L$${TOP_BUILD_DIR}/cfitsio -lcfitsio
 INCLUDEPATH += $${TOP_SRC_DIR}/cfitsio
 

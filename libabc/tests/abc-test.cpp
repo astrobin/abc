@@ -51,6 +51,22 @@ void AbcTest::loadFits()
     QCOMPARE(image.size(), QSize(512, 512));
 }
 
+void AbcTest::loadRaw()
+{
+    Image image;
+    QVERIFY(!image.isValid());
+    QCOMPARE(image.type(), UnknownType);
+
+    bool ok = image.load("dsc00392.arw");
+    QVERIFY(ok);
+    QVERIFY(image.isValid());
+    QCOMPARE(image.size(), QSize(4288, 2856));
+    QCOMPARE(image.cameraModel(), QLatin1String("SONY DSLR-A700"));
+    QCOMPARE(image.exposure(), 1/50.0f);
+    QCOMPARE(image.observationDate(),
+             QDateTime::fromString("2012-07-20T17:56:27", Qt::ISODate));
+}
+
 void AbcTest::imageSetAverage()
 {
     Image source;

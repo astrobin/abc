@@ -34,6 +34,7 @@ private Q_SLOTS:
     void cleanupTestCase();
 
     void loadFits();
+    void loadRaw();
     void imageSetAverage();
     void imageSetBounds();
     void imageOperations();
