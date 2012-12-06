@@ -372,7 +372,7 @@ bool ImageData::loadRaw()
     }
     PixelValue standardDeviation = sqrtf(sum);
 
-    if (standardDeviation <= standardDeviationEps) {
+    if (standardDeviation >= standardDeviationEps) {
         type = Light;
     } else if (exposure <= 1.0/500) {
         type = Offset;
