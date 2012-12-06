@@ -1,3 +1,21 @@
+== PREREQUISITES ==
+
+Dependences:
+  - libraw
+  - pyside
+  - python-dev
+  - shiboken
+
+To install the dependencies in Ubuntu 12.04:
+
+  sudo apt-get install libraw-dev \
+    python-pyside libpyside-dev \
+    shiboken libshiboken-dev \
+    python-dev
+
+
+== BUILDING ==
+
 First, configure the CFITSIO library:
 
   cd cfitsio
