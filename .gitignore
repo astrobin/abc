@@ -1,6 +1,7 @@
 *.a
 *.log
 *.o
+*.so
 .*
 /cfitsio/cfitsio.pc
 /cfitsio/config.status
