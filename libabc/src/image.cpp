@@ -64,6 +64,7 @@ public:
     bool loadRaw();
     void closeRaw();
 
+    void autoDetectType();
     long resize(const QSize &newSize);
 
     long totalPixels() const { return size.width() * size.height(); }
@@ -349,8 +350,6 @@ bool ImageData::loadRaw()
 
     ushort *rawData = raw->imgdata.rawdata.raw_image;
     unsigned maximum = raw->imgdata.rawdata.color.maximum;
-    /* while at it, compute the mean as well */
-    PixelValue sum = 0;
     for (int i = 0; i < numPixels; i++) {
         ushort pixel = rawData[i];
         if (pixel >= maximum) {
@@ -361,6 +360,21 @@ bool ImageData::loadRaw()
         } else {
             pixels[i] = PixelValue(pixel) / maximum;
         }
+    }
+
+    return true;
+}
+
+void ImageData::autoDetectType()
+{
+    if (pixels == 0) loadPixels();
+    Q_ASSERT(pixels != 0);
+
+    long numPixels = totalPixels();
+
+    /* Compute the mean */
+    PixelValue sum = 0;
+    for (int i = 0; i < numPixels; i++) {
         sum += pixels[i];
     }
     PixelValue mean = sum / numPixels;
@@ -384,7 +398,6 @@ bool ImageData::loadRaw()
 
     DEBUG() << "Mean:" << mean << "Std.dev.:" << standardDeviation <<
         "=>" << type;
-    return true;
 }
 
 long ImageData::resize(const QSize &newSize)
@@ -515,6 +528,10 @@ bool Image::load(const QString &fileName, const QString &label)
             QFileInfo fi(fileName);
             d->type = typeFromString(fi.baseName());
         }
+
+        /* as last resort, autodetect the file type based on the pixel data */
+        if (d->type == UnknownType)
+            d->autoDetectType();
     }
 
     return ok;
