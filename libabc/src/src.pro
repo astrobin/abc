@@ -17,3 +17,6 @@ SOURCES += \
     configuration.cpp \
     image-set.cpp \
     image.cpp
+
+target.path = $${INSTALL_LIBDIR}
+INSTALLS += target
