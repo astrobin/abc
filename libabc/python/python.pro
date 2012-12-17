@@ -15,7 +15,7 @@ PKGCONFIG += \
     shiboken
 
 PYSIDE_INC_ROOT = $$system(pkg-config --variable includedir pyside)
-PYSIDE_PYTHONPATH = $$system(pkg-config --variable pythonpath pyside)
+PYTHON_LIBDIR = $$system(python -c \"from distutils.sysconfig import get_python_lib; print (get_python_lib())\")
 INCLUDEPATH += $${PYSIDE_INC_ROOT}/QtCore
 
 QTROOT_INC=$$[QT_INSTALL_HEADERS]
@@ -34,7 +34,7 @@ SOURCES += \
     PyABC/abc_image_wrapper.cpp \
     PyABC/abc_imageset_wrapper.cpp
 
-target.path = $${PYSIDE_PYTHONPATH}
+target.path = $${PYTHON_LIBDIR}
 INSTALLS += target
 
 check.commands = "LD_LIBRARY_PATH=../src:$LD_LIBRARY_PATH ./abc-test.py"
