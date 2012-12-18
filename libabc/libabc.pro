@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
-SUBDIRS = src tests
+SUBDIRS = src include tests
 
 !CONFIG(disable_python) {
     SUBDIRS += python

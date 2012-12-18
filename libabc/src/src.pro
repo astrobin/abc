@@ -18,5 +18,12 @@ SOURCES += \
     image-set.cpp \
     image.cpp
 
+headers.files = \
+    calibration-set.h \
+    image-set.h \
+    image.h
+headers.path = $${INSTALL_PREFIX}/include/ABC/
+INSTALLS += headers
+
 target.path = $${INSTALL_LIBDIR}
 INSTALLS += target
