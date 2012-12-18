@@ -3,7 +3,8 @@ include(common-config.pri)
 TEMPLATE = subdirs
 SUBDIRS = \
     cfitsio \
-    libabc
+    libabc \
+    uploader
 CONFIG += ordered
 
 DISTNAME = $${PROJECT_NAME}-$${PROJECT_VERSION}
