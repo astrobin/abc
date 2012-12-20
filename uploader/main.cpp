@@ -7,15 +7,13 @@
  * All rights reserved.
  */
 
+#include "application.h"
 #include "debug.h"
 #include "system-tray.h"
 
-#include <QApplication>
-
 int main(int argc, char **argv)
 {
-    QApplication app(argc, argv);
-    app.setQuitOnLastWindowClosed(false);
+    ABC::Application app(argc, argv);
 
     ABC::SystemTray sysTray;
     sysTray.show();

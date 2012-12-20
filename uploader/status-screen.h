@@ -12,6 +12,8 @@
 
 #include <QDialog>
 
+class QLabel;
+
 namespace ABC {
 
 class StatusScreen: public QDialog
@@ -24,6 +26,13 @@ public:
 
 private:
     StatusScreen(QWidget *parent = 0);
+
+private Q_SLOTS:
+    void updateProgress();
+    void onConfigButtonClicked();
+
+private:
+    QLabel *progressLabel;
 };
 
 }; // namespace
