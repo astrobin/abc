@@ -16,12 +16,18 @@ SOURCES += \
     calibration-set.cpp \
     configuration.cpp \
     image-set.cpp \
-    image.cpp
+    image.cpp \
+    upload-item.cpp
+
+HEADERS += \
+    upload-item.h
 
 headers.files = \
     calibration-set.h \
     image-set.h \
-    image.h
+    image.h \
+    upload-item.h
+
 headers.path = $${INSTALL_PREFIX}/include/ABC/
 INSTALLS += headers
 
