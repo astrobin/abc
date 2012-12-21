@@ -21,6 +21,7 @@ SOURCES += \
     application.cpp \
     config-screen.cpp \
     configuration.cpp \
+    file-monitor.cpp \
     main.cpp \
     status-screen.cpp \
     system-tray.cpp \
@@ -32,6 +33,7 @@ HEADERS += \
     config-screen.h \
     configuration.h \
     debug.h \
+    file-monitor.h \
     status-screen.h \
     system-tray.h \
     upload-queue.h

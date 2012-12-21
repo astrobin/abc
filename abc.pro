@@ -4,7 +4,8 @@ TEMPLATE = subdirs
 SUBDIRS = \
     cfitsio \
     libabc \
-    uploader
+    uploader \
+    tests
 CONFIG += ordered
 
 DISTNAME = $${PROJECT_NAME}-$${PROJECT_VERSION}
