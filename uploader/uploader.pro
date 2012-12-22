@@ -21,6 +21,7 @@ SOURCES += \
     application.cpp \
     config-screen.cpp \
     configuration.cpp \
+    controller.cpp \
     file-monitor.cpp \
     main.cpp \
     status-screen.cpp \
@@ -32,6 +33,7 @@ HEADERS += \
     application.h \
     config-screen.h \
     configuration.h \
+    controller.h \
     debug.h \
     file-monitor.h \
     status-screen.h \

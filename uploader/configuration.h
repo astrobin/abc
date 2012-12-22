@@ -12,6 +12,8 @@
 
 #include <QSettings>
 
+class QDateTime;
+
 namespace ABC {
 
 class ConfigurationPrivate;
@@ -31,6 +33,12 @@ public:
 
     void setUploadPath(const QString &path);
     QString uploadPath() const;
+
+    void setLastUploadTime(const QDateTime &time);
+    QDateTime lastUploadTime() const;
+
+Q_SIGNALS:
+    void uploadPathChanged();
 
 private:
     ConfigurationPrivate *d_ptr;

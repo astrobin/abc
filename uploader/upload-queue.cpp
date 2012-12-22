@@ -7,6 +7,8 @@
  * All rights reserved.
  */
 
+#include "application.h"
+#include "configuration.h"
 #include "debug.h"
 #include "upload-queue.h"
 
@@ -34,6 +36,7 @@ private:
 } // namespace
 
 UploadQueuePrivate::UploadQueuePrivate(UploadQueue *q):
+    QObject(q),
     q_ptr(q)
 {
 }

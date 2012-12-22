@@ -126,7 +126,6 @@ FileMonitorPrivate::filesChangedSince(const QDateTime &since,
 {
     QStringList list;
 
-    DEBUG() << path << since;
     QDir dir(path);
     QFileInfoList allFiles = dir.entryInfoList(QDir::Files | QDir::Dirs |
                                                QDir::NoDotAndDotDot |

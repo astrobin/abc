@@ -8,12 +8,15 @@
  */
 
 #include "application.h"
+#include "controller.h"
 #include "debug.h"
 #include "system-tray.h"
 
 int main(int argc, char **argv)
 {
     ABC::Application app(argc, argv);
+
+    ABC::Controller controller;
 
     ABC::SystemTray sysTray;
     sysTray.show();

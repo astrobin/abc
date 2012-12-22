@@ -10,8 +10,11 @@
 #include "configuration.h"
 #include "debug.h"
 
+#include <QDateTime>
+
 using namespace ABC;
 
+static const QLatin1String keyLastUploadTime("LastUploadTime");
 static const QLatin1String keyUploadPath("UploadPath");
 static const QLatin1String keyUserName("UserName");
 static const QLatin1String keyPassword("Password");
@@ -69,10 +72,24 @@ QString Configuration::password() const
 
 void Configuration::setUploadPath(const QString &uploadPath)
 {
+    QString oldValue = this->uploadPath();
+    if (uploadPath == oldValue) return;
+
     setValue(keyUploadPath, uploadPath);
+    Q_EMIT uploadPathChanged();
 }
 
 QString Configuration::uploadPath() const
 {
     return value(keyUploadPath).toString();
+}
+
+void Configuration::setLastUploadTime(const QDateTime &time)
+{
+    setValue(keyLastUploadTime, time);
+}
+
+QDateTime Configuration::lastUploadTime() const
+{
+    return value(keyLastUploadTime).toDateTime();
 }
