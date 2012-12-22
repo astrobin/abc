@@ -13,6 +13,7 @@
 #include "upload-queue.h"
 
 #include <ABC/UploadItem>
+#include <QHash>
 
 using namespace ABC;
 
@@ -29,7 +30,9 @@ public Q_SLOTS:
     void onProgressChanged(int progress);
 
 private:
+    /* "items" and "fileMap" must always be kept in sync */
     QList<UploadItem *> items;
+    QHash<QString, UploadItem *> fileMap;
     mutable UploadQueue *q_ptr;
 };
 
@@ -65,6 +68,13 @@ UploadQueue::~UploadQueue()
 void UploadQueue::requestUpload(const QString &fileName)
 {
     Q_D(UploadQueue);
+
+    if (d->fileMap.contains(fileName)) {
+        /* TODO: if the upload is in progress, check the file's last
+         * modification time and, if needed, re-start the download. */
+        return;
+    }
+
     UploadItem *item = new UploadItem(fileName, this);
     QObject::connect(item, SIGNAL(progressChanged(int)),
                      d, SLOT(onProgressChanged(int)));
@@ -73,6 +83,7 @@ void UploadQueue::requestUpload(const QString &fileName)
     int index = rowCount(root);
     beginInsertRows(root, index, index);
     d->items.append(item);
+    d->fileMap.insert(fileName, item);
     endInsertRows();
 
     // TODO: start download
