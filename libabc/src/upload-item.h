@@ -23,7 +23,7 @@
 
 #include <QMetaType>
 #include <QObject>
-#include <QUrl>
+#include <QString>
 
 namespace ABC {
 
@@ -33,10 +33,10 @@ class UploadItem: public QObject
     Q_OBJECT
 
 public:
-    UploadItem(const QUrl &fileName, QObject *parent = 0);
+    UploadItem(const QString &fileName, QObject *parent = 0);
     virtual ~UploadItem();
 
-    QUrl fileName() const;
+    QString fileName() const;
     int progress() const;
 
 public Q_SLOTS:

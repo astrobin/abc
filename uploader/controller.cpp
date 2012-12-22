@@ -83,7 +83,7 @@ void ControllerPrivate::onDirectoryChanged()
     QStringList allFiles = watcher.filesChangedSince(oldLastUpdateTime);
     foreach (const QString &fileName, allFiles) {
         DEBUG() << "File:" << fileName;
-        uploadQueue->requestUpload(QUrl::fromLocalFile(fileName));
+        uploadQueue->requestUpload(fileName);
     }
 }
 

@@ -62,7 +62,7 @@ UploadQueue::~UploadQueue()
     d_ptr = 0;
 }
 
-void UploadQueue::requestUpload(const QUrl &fileName)
+void UploadQueue::requestUpload(const QString &fileName)
 {
     Q_D(UploadQueue);
     UploadItem *item = new UploadItem(fileName, this);

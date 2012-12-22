@@ -29,24 +29,24 @@ class UploadItemPrivate
 {
     Q_DECLARE_PUBLIC(UploadItem)
 
-    UploadItemPrivate(const QUrl &fileName, UploadItem *q);
+    UploadItemPrivate(const QString &fileName, UploadItem *q);
 
 private:
-    QUrl fileName;
+    QString fileName;
     int progress;
     mutable UploadItem *q_ptr;
 };
 
 } // namespace
 
-UploadItemPrivate::UploadItemPrivate(const QUrl &fileName, UploadItem *q):
+UploadItemPrivate::UploadItemPrivate(const QString &fileName, UploadItem *q):
     fileName(fileName),
     progress(0),
     q_ptr(q)
 {
 }
 
-UploadItem::UploadItem(const QUrl &fileName, QObject *parent):
+UploadItem::UploadItem(const QString &fileName, QObject *parent):
     QObject(parent),
     d_ptr(new UploadItemPrivate(fileName, this))
 {
@@ -58,7 +58,7 @@ UploadItem::~UploadItem()
     d_ptr = 0;
 }
 
-QUrl UploadItem::fileName() const
+QString UploadItem::fileName() const
 {
     Q_D(const UploadItem);
     return d->fileName;

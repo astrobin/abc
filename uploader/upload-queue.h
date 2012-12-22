@@ -28,7 +28,7 @@ public:
     UploadQueue(QObject *parent = 0);
     virtual ~UploadQueue();
 
-    void requestUpload(const QUrl &fileName);
+    void requestUpload(const QString &fileName);
 
     int completedUploads() const;
 
