@@ -74,17 +74,19 @@ void ControllerPrivate::updateWatcher()
 
 void ControllerPrivate::onDirectoryChanged()
 {
-    QDateTime oldLastUpdateTime = lastUpdateTime;
-    lastUpdateTime = QDateTime::currentDateTime();
+    QDateTime newLastUpdateTime = QDateTime::currentDateTime();
+
+    QStringList allFiles = watcher.filesChangedSince(lastUpdateTime);
+    if (allFiles.isEmpty()) return;
 
     UploadQueue *uploadQueue = Application::instance()->uploadQueue();
 
-    DEBUG() << "Scanning upload directory";
-    QStringList allFiles = watcher.filesChangedSince(oldLastUpdateTime);
     foreach (const QString &fileName, allFiles) {
         DEBUG() << "File:" << fileName;
         uploadQueue->requestUpload(fileName);
     }
+
+    lastUpdateTime = newLastUpdateTime;
 }
 
 Controller::Controller(QObject *parent):
