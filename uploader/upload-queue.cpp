@@ -68,6 +68,13 @@ void UploadQueue::requestUpload(const QUrl &fileName)
     UploadItem *item = new UploadItem(fileName, this);
     QObject::connect(item, SIGNAL(progressChanged(int)),
                      d, SLOT(onProgressChanged(int)));
+
+    QModelIndex root;
+    int index = rowCount(root);
+    beginInsertRows(root, index, index);
+    d->items.append(item);
+    endInsertRows();
+
     // TODO: start download
 }
 

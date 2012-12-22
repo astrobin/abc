@@ -15,6 +15,7 @@
 #include "upload-queue.h"
 
 #include <QDateTime>
+#include <QUrl>
 
 using namespace ABC;
 
@@ -82,7 +83,7 @@ void ControllerPrivate::onDirectoryChanged()
     QStringList allFiles = watcher.filesChangedSince(oldLastUpdateTime);
     foreach (const QString &fileName, allFiles) {
         DEBUG() << "File:" << fileName;
-        // TODO uploadQueue->addFile(fileName);
+        uploadQueue->requestUpload(QUrl::fromLocalFile(fileName));
     }
 }
 
