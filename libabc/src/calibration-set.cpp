@@ -57,7 +57,7 @@ static QString stringToFileName(const QString &text)
     QString result;
     int length = text.size();
     result.reserve(length);
-    for (int i; i < length; i++) {
+    for (int i = 0; i < length; i++) {
         QChar ch = text.at(i);
         if (ch.isLetterOrNumber() || ch == ' ' || ch == '_' || ch == '-') {
             result.append(ch);
