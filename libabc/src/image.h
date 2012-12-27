@@ -77,6 +77,9 @@ public:
     float exposure() const;
 
     QString cameraModel() const;
+    QString objectName() const;
+    QString telescopeName() const;
+    QString filterName() const;
 
     QDateTime observationDate() const;
 

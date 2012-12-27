@@ -12,6 +12,9 @@ class ABCTest(unittest.TestCase):
         self.assertEqual(image.type(), PyABC.ImageType.Light)
         self.assertEqual(int(image.temperature()), -20)
         self.assertEqual(image.cameraModel(), 'G2-1600, Id: 2115')
+        self.assertEqual(image.objectName(), 'M33')
+        self.assertEqual(image.telescopeName(), '')
+        self.assertEqual(image.filterName(), 'L')
         self.assertEqual(image.observationDate(),
                 datetime.datetime(2012, 9, 16, 21, 2, 19))
 

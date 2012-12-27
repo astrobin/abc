@@ -131,6 +131,9 @@ void AbcTest::imageOperations()
     QCOMPARE(b.temperature(), -20.0016f);
     QCOMPARE(b.exposure(), 900.0f);
     QCOMPARE(b.cameraModel(), QLatin1String("G2-1600, Id: 2115"));
+    QCOMPARE(b.objectName(), QLatin1String("M33"));
+    QCOMPARE(b.telescopeName(), QLatin1String(""));
+    QCOMPARE(b.filterName(), QLatin1String("L"));
     QCOMPARE(b.observationDate(),
              QDateTime::fromString("2012-09-16T21:02:19", Qt::ISODate));
     Image c = Image::fromFile("2_64f.fit");

@@ -89,6 +89,9 @@ public:
     float temperature;
     float exposure;
     QString cameraModel;
+    QString objectName;
+    QString telescopeName;
+    QString filterName;
     QDateTime observationDate;
     QSize size;
     mutable PixelValue *lineBuffer;
@@ -141,6 +144,9 @@ ImageData::ImageData(const ImageData &other):
     temperature(other.temperature),
     exposure(other.exposure),
     cameraModel(other.cameraModel),
+    objectName(other.objectName),
+    telescopeName(other.telescopeName),
+    filterName(other.filterName),
     observationDate(other.observationDate),
     lineBuffer(0),
     pixels(0),
@@ -271,6 +277,33 @@ bool ImageData::loadFits()
         cameraModel = QString::fromLatin1(headerRecord);
     } else {
         cameraModel = QString();
+        status = 0;
+    }
+
+    /* Object name. */
+    fits_read_key(ff, TSTRING, "OBJECT", headerRecord, NULL, &status);
+    if (status == 0) {
+        objectName = QString::fromLatin1(headerRecord);
+    } else {
+        objectName = QString();
+        status = 0;
+    }
+
+    /* Telescope name. */
+    fits_read_key(ff, TSTRING, "TELESCOP", headerRecord, NULL, &status);
+    if (status == 0) {
+        telescopeName = QString::fromLatin1(headerRecord);
+    } else {
+        telescopeName = QString();
+        status = 0;
+    }
+
+    /* Filter name. */
+    fits_read_key(ff, TSTRING, "FILTER", headerRecord, NULL, &status);
+    if (status == 0) {
+        filterName = QString::fromLatin1(headerRecord);
+    } else {
+        filterName = QString();
         status = 0;
     }
 
@@ -624,6 +657,21 @@ float Image::exposure() const
 QString Image::cameraModel() const
 {
     return d->cameraModel;
+}
+
+QString Image::objectName() const
+{
+    return d->objectName;
+}
+
+QString Image::telescopeName() const
+{
+    return d->telescopeName;
+}
+
+QString Image::filterName() const
+{
+    return d->filterName;
 }
 
 QDateTime Image::observationDate() const
