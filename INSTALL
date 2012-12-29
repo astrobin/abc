@@ -1,6 +1,7 @@
 == PREREQUISITES ==
 
 Dependences:
+  - libqjson
   - libraw
   - pyside
   - python-dev
@@ -8,7 +9,7 @@ Dependences:
 
 To install the dependencies in Ubuntu 12.04:
 
-  sudo apt-get install libraw-dev \
+  sudo apt-get install libqjson-dev libraw-dev \
     python-pyside libpyside-dev \
     shiboken libshiboken-dev \
     python-dev
