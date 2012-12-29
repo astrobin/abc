@@ -37,9 +37,6 @@ public:
                   int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-Q_SIGNALS:
-    void uploadCompleted();
-
 private:
     UploadQueuePrivate *d_ptr;
     Q_DECLARE_PRIVATE(UploadQueue)

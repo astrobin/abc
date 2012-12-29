@@ -13,7 +13,15 @@
 #include "upload-queue.h"
 
 #include <ABC/UploadItem>
+#include <QDateTime>
+#include <QFileInfo>
 #include <QHash>
+#include <QQueue>
+#include <QSet>
+#include <QTimer>
+
+#define MAX_UPLOADS 2
+#define SAFE_UPLOAD_DELAY   10 // seconds
 
 using namespace ABC;
 
@@ -27,12 +35,16 @@ class UploadQueuePrivate: public QObject
     UploadQueuePrivate(UploadQueue *q);
 
 public Q_SLOTS:
+    void runQueue();
     void onProgressChanged(int progress);
 
 private:
     /* "items" and "fileMap" must always be kept in sync */
     QList<UploadItem *> items;
     QHash<QString, UploadItem *> fileMap;
+    QQueue<UploadItem *> queue;
+    QSet<UploadItem *> activeUploads;
+    QTimer runTimer;
     mutable UploadQueue *q_ptr;
 };
 
@@ -42,15 +54,68 @@ UploadQueuePrivate::UploadQueuePrivate(UploadQueue *q):
     QObject(q),
     q_ptr(q)
 {
+    runTimer.setSingleShot(true);
+    runTimer.setInterval(SAFE_UPLOAD_DELAY * 1000);
+    QObject::connect(&runTimer, SIGNAL(timeout()),
+                     this, SLOT(runQueue()));
+}
+
+void UploadQueuePrivate::runQueue()
+{
+    if (queue.isEmpty() || activeUploads.count() >= MAX_UPLOADS) return;
+
+    QDateTime safeUploadTime =
+        QDateTime::currentDateTimeUtc().addSecs(-SAFE_UPLOAD_DELAY);
+    int rescheduled = 0;
+    int numItems = queue.count();
+    do {
+        UploadItem *item = queue.dequeue();
+        /* Check that the file hasn't been modified in the last few seconds
+         * (because otherwise it might not be complete) */
+        QFileInfo info(item->fileName());
+        if (info.lastModified() > safeUploadTime) {
+            // push the item at the end of the queue
+            queue.enqueue(item);
+            rescheduled++;
+        } else {
+            activeUploads.insert(item);
+            item->startUpload();
+        }
+    } while (activeUploads.count() < MAX_UPLOADS &&
+             rescheduled < numItems);
+
+    /* If all items were rescheduled, it means that no files can be
+     * safely uploaded at the moment; in that case, let's try again after
+     * some time. */
+    if (rescheduled >= numItems && !runTimer.isActive()) {
+        runTimer.start();
+    }
 }
 
 void UploadQueuePrivate::onProgressChanged(int progress)
 {
     Q_Q(UploadQueue);
 
-    if (progress < 0 || progress >= 100) {
-        Q_EMIT q->uploadCompleted();
+    if (progress > 0 && progress < 100) {
+        /* At the moment, we are not interested in the download progress
+         * of a single file. */
+        return;
     }
+
+    UploadItem *item = qobject_cast<UploadItem *>(sender());
+    if (item == 0) return;
+
+    int index = items.indexOf(item);
+    if (index < 0) return;
+
+    activeUploads.remove(item);
+
+    if (progress < 0) {
+        // TODO: handle errors (put the item back into the queue?)
+    }
+
+    QModelIndex modelIndex = q->index(index, 0);
+    Q_EMIT q->dataChanged(modelIndex, modelIndex);
 }
 
 UploadQueue::UploadQueue(QObject *parent):

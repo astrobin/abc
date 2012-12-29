@@ -37,7 +37,8 @@ StatusScreen::StatusScreen(QWidget *parent):
     setLayout(layout);
 
     UploadQueue *uploadQueue = Application::instance()->uploadQueue();
-    QObject::connect(uploadQueue, SIGNAL(uploadCompleted()),
+    QObject::connect(uploadQueue,
+                     SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),
                      this, SLOT(updateProgress()));
     QObject::connect(uploadQueue,
                      SIGNAL(rowsInserted(const QModelIndex &, int, int)),
