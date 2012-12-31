@@ -12,6 +12,7 @@
 #include "debug.h"
 #include "upload-queue.h"
 
+#include <ABC/Site>
 #include <ABC/UploadItem>
 #include <QDateTime>
 #include <QFileInfo>
@@ -35,6 +36,8 @@ class UploadQueuePrivate: public QObject
     UploadQueuePrivate(UploadQueue *q);
 
 public Q_SLOTS:
+    void authenticate();
+    void onAuthenticationFinished();
     void runQueue();
     void onProgressChanged(int progress);
 
@@ -45,6 +48,7 @@ private:
     QQueue<UploadItem *> queue;
     QSet<UploadItem *> activeUploads;
     QTimer runTimer;
+    Site *site;
     mutable UploadQueue *q_ptr;
 };
 
@@ -52,12 +56,44 @@ private:
 
 UploadQueuePrivate::UploadQueuePrivate(UploadQueue *q):
     QObject(q),
+    site(new Site(this)),
     q_ptr(q)
 {
     runTimer.setSingleShot(true);
     runTimer.setInterval(SAFE_UPLOAD_DELAY * 1000);
     QObject::connect(&runTimer, SIGNAL(timeout()),
                      this, SLOT(runQueue()));
+
+    QObject::connect(site, SIGNAL(authenticationFinished()),
+                     this, SLOT(onAuthenticationFinished()));
+    authenticate();
+}
+
+void UploadQueuePrivate::authenticate()
+{
+    if (site->isAuthenticated()) {
+        onAuthenticationFinished();
+        return;
+    }
+
+    Configuration *configuration =
+       Application::instance()->configuration();
+
+    site->setLoginData(configuration->userName(),
+                       configuration->password());
+    site->authenticate();
+}
+
+void UploadQueuePrivate::onAuthenticationFinished()
+{
+    if (Q_UNLIKELY(!site->isAuthenticated())) {
+        qWarning() << "Authentication failed";
+        // TODO: expose the error to the UI
+        return;
+    }
+
+    DEBUG() << "Authenticated; running queue";
+    runQueue();
 }
 
 void UploadQueuePrivate::runQueue()
@@ -149,9 +185,10 @@ void UploadQueue::requestUpload(const QString &fileName)
     beginInsertRows(root, index, index);
     d->items.append(item);
     d->fileMap.insert(fileName, item);
+    d->queue.enqueue(item);
     endInsertRows();
 
-    // TODO: start download
+    d->authenticate();
 }
 
 int UploadQueue::completedUploads() const
