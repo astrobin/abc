@@ -34,7 +34,7 @@ class FileLogPrivate
     ~FileLogPrivate() {}
 
     bool isLogged(const QString &filePath) const;
-    QStringList filterLogged(const QStringList &allFiles) const;
+    QStringList filterOutLogged(const QStringList &allFiles) const;
     void addFile(const QString &filePath);
 
 private:
@@ -157,12 +157,12 @@ bool FileLogPrivate::isLogged(const QString &filePath) const
     return false;
 }
 
-QStringList FileLogPrivate::filterLogged(const QStringList &allFiles) const
+QStringList FileLogPrivate::filterOutLogged(const QStringList &allFiles) const
 {
     QStringList loggedFiles;
 
     foreach (const QString &file, allFiles) {
-        if (isLogged(file)) loggedFiles.append(file);
+        if (!isLogged(file)) loggedFiles.append(file);
     }
     return loggedFiles;
 }
@@ -206,8 +206,8 @@ bool FileLog::isLogged(const QString &filePath) const
     return d->isLogged(filePath);
 }
 
-QStringList FileLog::filterLogged(const QStringList &allFiles) const
+QStringList FileLog::filterOutLogged(const QStringList &allFiles) const
 {
     Q_D(const FileLog);
-    return d->filterLogged(allFiles);
+    return d->filterOutLogged(allFiles);
 }

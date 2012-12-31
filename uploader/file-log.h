@@ -30,7 +30,7 @@ public:
     void setBasePath(const QString &path);
 
     bool isLogged(const QString &filePath) const;
-    QStringList filterLogged(const QStringList &allFiles) const;
+    QStringList filterOutLogged(const QStringList &allFiles) const;
 
 public Q_SLOTS:
     void addFile(const QString &filePath);
