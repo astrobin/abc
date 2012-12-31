@@ -52,6 +52,7 @@ class SitePrivate: public QObject
     void setError(Site::ErrorCode code,
                   const QString &message = QString());
     bool handleNetworkError(QNetworkReply *reply);
+    QByteArray accessTokenFromReply(QNetworkReply *reply);
 
 private Q_SLOTS:
     void onAuthenticateReply();
@@ -90,6 +91,9 @@ void SitePrivate::authenticate()
 {
     ensureHasNetworkAccessManager();
 
+    // Clear any existing access token
+    accessToken.clear();
+
     QUrl authUrl(AUTH_URL);
     QNetworkRequest request(authUrl);
     request.setRawHeader("Content-Type",
@@ -126,22 +130,10 @@ void SitePrivate::setError(Site::ErrorCode code, const QString &message)
     Q_EMIT q->error(code);
 }
 
-void SitePrivate::onAuthenticateReply()
+QByteArray SitePrivate::accessTokenFromReply(QNetworkReply *reply)
 {
-    Q_Q(Site);
-
-    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
-    Q_ASSERT(reply != 0);
-
-    if (reply->error() != QNetworkReply::NoError) {
-        if (handleNetworkError(reply))
-            return;
-    }
-
     QByteArray replyContent = reply->readAll();
     DEBUG() << replyContent;
-
-    reply->deleteLater();
 
     uint statusCode =
         reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
@@ -149,13 +141,28 @@ void SitePrivate::onAuthenticateReply()
         DEBUG() << "Status code:" << statusCode;
         setError(Site::NetworkError,
                  QString("Got HTTP code %1").arg(statusCode));
-        return;
+        return QByteArray();
     }
 
     QVariantMap response = parseJson(replyContent);
     if (response.contains("token")) {
-        q->setAccessToken(response["token"].toByteArray());
+        return response["token"].toByteArray();
     }
+
+    return QByteArray();
+}
+
+void SitePrivate::onAuthenticateReply()
+{
+    Q_Q(Site);
+
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    Q_ASSERT(reply != 0);
+
+    QByteArray token = accessTokenFromReply(reply);
+    reply->deleteLater();
+
+    q->setAccessToken(token);
 }
 
 bool SitePrivate::handleNetworkError(QNetworkReply *reply)
@@ -222,9 +229,7 @@ void Site::setAccessToken(const QByteArray &token)
     Q_D(Site);
     if (token == d->accessToken) return;
     d->accessToken = token;
-    if (!d->accessToken.isEmpty()) {
-        Q_EMIT authenticated();
-    }
+    Q_EMIT authenticationFinished();
 }
 
 bool Site::isAuthenticated() const

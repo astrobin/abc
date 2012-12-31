@@ -61,7 +61,7 @@ public Q_SLOTS:
     void authenticate();
 
 Q_SIGNALS:
-    void authenticated();
+    void authenticationFinished();
     void error(Site::ErrorCode);
 
 private:
