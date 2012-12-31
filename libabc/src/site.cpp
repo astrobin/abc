@@ -103,6 +103,7 @@ void SitePrivate::authenticate()
     data.addQueryItem("password", password);
 
     QNetworkReply *reply = nam->post(request, data.encodedQuery());
+    reply->ignoreSslErrors();
     connect(reply, SIGNAL(finished()),
             this, SLOT(onAuthenticateReply()));
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
