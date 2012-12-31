@@ -37,6 +37,8 @@ public:
     void setLastUploadTime(const QDateTime &time);
     QDateTime lastUploadTime() const;
 
+    QString logDbPath() const;
+
 Q_SIGNALS:
     void uploadPathChanged();
 

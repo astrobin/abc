@@ -1,7 +1,8 @@
 TARGET = abc-uploader
 
 QT += \
-    gui
+    gui \
+    sql
 
 LIBABC = ../libabc
 
@@ -22,6 +23,7 @@ SOURCES += \
     config-screen.cpp \
     configuration.cpp \
     controller.cpp \
+    file-log.cpp \
     file-monitor.cpp \
     main.cpp \
     status-screen.cpp \
@@ -35,6 +37,7 @@ HEADERS += \
     configuration.h \
     controller.h \
     debug.h \
+    file-log.h \
     file-monitor.h \
     status-screen.h \
     system-tray.h \

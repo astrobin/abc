@@ -11,6 +11,8 @@
 #include "debug.h"
 
 #include <QDateTime>
+#include <QDesktopServices>
+#include <QDir>
 
 using namespace ABC;
 
@@ -18,6 +20,7 @@ static const QLatin1String keyLastUploadTime("LastUploadTime");
 static const QLatin1String keyUploadPath("UploadPath");
 static const QLatin1String keyUserName("UserName");
 static const QLatin1String keyPassword("Password");
+static const QLatin1String keyLogDbPath("LogDbPath");
 
 namespace ABC {
 
@@ -92,4 +95,16 @@ void Configuration::setLastUploadTime(const QDateTime &time)
 QDateTime Configuration::lastUploadTime() const
 {
     return value(keyLastUploadTime).toDateTime();
+}
+
+QString Configuration::logDbPath() const
+{
+    QString path = value(keyLogDbPath).toString();
+    if (path.isEmpty()) {
+        QString directory =
+            QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+        path = directory + QDir::separator() + "abc-uploader.db";
+    }
+
+    return path;
 }

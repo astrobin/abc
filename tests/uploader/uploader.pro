@@ -1,6 +1,7 @@
 TARGET = uploader-test
 
 QT += \
+    sql \
     testlib
 
 LIBABC = ../../libabc
@@ -19,11 +20,19 @@ LIBS += \
     -labc
 
 SOURCES += \
+    $${SRC}/application.cpp \
+    $${SRC}/configuration.cpp \
+    $${SRC}/file-log.cpp \
     $${SRC}/file-monitor.cpp \
+    $${SRC}/upload-queue.cpp \
     uploader-test.cpp
 
 HEADERS += \
+    $${SRC}/application.h \
+    $${SRC}/configuration.h \
+    $${SRC}/file-log.h \
     $${SRC}/file-monitor.h \
+    $${SRC}/upload-queue.h \
     uploader-test.h
 
 check.commands = ./uploader-test

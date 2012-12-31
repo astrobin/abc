@@ -10,6 +10,7 @@
 #ifndef ABC_UPLOADER_TEST_H
 #define ABC_UPLOADER_TEST_H
 
+#include <QString>
 #include <QTest>
 
 namespace ABC {
@@ -23,6 +24,10 @@ private Q_SLOTS:
     void cleanupTestCase();
 
     void fileMonitor();
+    void fileLog();
+
+private:
+    QString createTmpDir();
 };
 
 }; // namespace

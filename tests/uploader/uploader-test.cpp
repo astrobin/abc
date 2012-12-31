@@ -9,6 +9,9 @@
 
 #include "uploader-test.h"
 
+#include "application.h"
+#include "configuration.h"
+#include "file-log.h"
 #include "file-monitor.h"
 
 #include <QDebug>
@@ -21,18 +24,15 @@ using namespace ABC;
 
 void UploaderTest::initTestCase()
 {
+    QApplication::setApplicationName("abc-uploader-test");
 }
 
 void UploaderTest::cleanupTestCase()
 {
 }
 
-void UploaderTest::fileMonitor()
+QString UploaderTest::createTmpDir()
 {
-    FileMonitor monitor;
-    QSignalSpy changedSignal(&monitor, SIGNAL(changed()));
-    QDateTime startTestTime = QDateTime::currentDateTime();
-
     QDir tmpDir = QDir::temp();
     QString dirName;
     bool created = false;
@@ -41,10 +41,19 @@ void UploaderTest::fileMonitor()
         dirName = QString("abc-fm-test%1").arg(attempt++);
         created = tmpDir.mkdir(dirName);
     } while (!created);
-    QVERIFY(created);
 
-    QVERIFY(tmpDir.cd(dirName));
-    QString basePath = tmpDir.canonicalPath();
+    tmpDir.cd(dirName);
+    return tmpDir.canonicalPath();
+}
+
+void UploaderTest::fileMonitor()
+{
+    FileMonitor monitor;
+    QSignalSpy changedSignal(&monitor, SIGNAL(changed()));
+    QDateTime startTestTime = QDateTime::currentDateTime();
+
+    QString basePath = createTmpDir();
+    QDir tmpDir(basePath);
     monitor.setBasePath(basePath);
 
     QCOMPARE(changedSignal.count(), 0);
@@ -106,4 +115,73 @@ void UploaderTest::fileMonitor()
     QCOMPARE(newFiles, expectedNewFiles);
 }
 
-QTEST_MAIN(UploaderTest)
+void UploaderTest::fileLog()
+{
+    // Remove existing DB
+    QFile::remove(Application::instance()->configuration()->logDbPath());
+    FileLog log;
+
+    QString basePath = createTmpDir();
+    log.setBasePath(basePath);
+
+    QCOMPARE(log.isLogged("dummy"), false);
+
+    QDir tmpDir(basePath);
+
+    /* Create some files and directories */
+    QString dummyFile = tmpDir.filePath("dummy");
+    QFile dummy(dummyFile);
+    QVERIFY(dummy.open(QIODevice::WriteOnly));
+    dummy.write("Some content");
+    dummy.close();
+
+    dummy.setFileName(tmpDir.filePath("another file"));
+    QVERIFY(dummy.open(QIODevice::WriteOnly));
+    dummy.write("Totally different file");
+    dummy.close();
+
+    QDir subDir = tmpDir;
+    subDir.mkdir("subdir");
+    subDir.cd("subdir");
+    dummy.setFileName(subDir.filePath("image2.jpg"));
+    QVERIFY(dummy.open(QIODevice::WriteOnly));
+    dummy.write("Image file");
+    dummy.close();
+
+    QCOMPARE(log.isLogged("dummy"), false);
+    QCOMPARE(log.isLogged("subdir/image2.jpg"), false);
+
+    /* Add files to the log */
+    log.addFile("dummy");
+    log.addFile("subdir/image2.jpg");
+    QCOMPARE(log.isLogged("dummy"), true);
+    QCOMPARE(log.isLogged("another file"), false);
+    QCOMPARE(log.isLogged("subdir/image2.jpg"), true);
+
+    /* Change the date of a file; the file should still be logged */
+    QTest::qWait(2000);
+    QFile::copy(dummyFile, tmpDir.filePath("dummy2"));
+    QFile::remove(dummyFile);
+    QFile::rename(tmpDir.filePath("dummy2"), dummyFile);
+    QCOMPARE(log.isLogged("dummy"), true);
+
+    /* Change the contents of a file; this should mark the file as not
+     * being logged anymore */
+    dummy.setFileName(dummyFile);
+    QVERIFY(dummy.open(QIODevice::Append));
+    dummy.write("Some more text");
+    dummy.close();
+
+    QCOMPARE(log.isLogged("dummy"), false);
+
+    log.addFile("dummy");
+    QCOMPARE(log.isLogged("dummy"), true);
+}
+
+int main(int argc, char **argv)
+{
+    Application app(argc, argv);
+
+    UploaderTest test1;
+    return QTest::qExec(&test1);
+}
