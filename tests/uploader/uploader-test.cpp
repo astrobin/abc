@@ -152,11 +152,11 @@ void UploaderTest::fileLog()
     QCOMPARE(log.isLogged("subdir/image2.jpg"), false);
 
     /* Add files to the log */
-    log.addFile("dummy");
+    log.addFile(tmpDir.absoluteFilePath("dummy"));
     log.addFile("subdir/image2.jpg");
     QCOMPARE(log.isLogged("dummy"), true);
     QCOMPARE(log.isLogged("another file"), false);
-    QCOMPARE(log.isLogged("subdir/image2.jpg"), true);
+    QCOMPARE(log.isLogged(subDir.absoluteFilePath("image2.jpg")), true);
 
     /* Change the date of a file; the file should still be logged */
     QTest::qWait(2000);

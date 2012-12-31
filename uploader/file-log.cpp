@@ -44,7 +44,7 @@ private:
 
 private:
     QSqlDatabase db;
-    QString basePath;
+    QDir baseDir;
     mutable FileLog *q_ptr;
 };
 
@@ -106,7 +106,7 @@ bool FileLogPrivate::updateDb(int oldVersion)
 QString FileLogPrivate::computeHash(const QString &filePath) const
 {
     QCryptographicHash hash(QCryptographicHash::Md5);
-    QFile file(basePath + QDir::separator() + filePath);
+    QFile file(filePath);
     file.open(QIODevice::ReadOnly);
     hash.addData(file.readAll());
     return QString(hash.result().toHex());
@@ -114,12 +114,14 @@ QString FileLogPrivate::computeHash(const QString &filePath) const
 
 void FileLogPrivate::addFile(const QString &filePath)
 {
-    QFileInfo info(basePath + QDir::separator() + filePath);
+    QString absolutePath = baseDir.absoluteFilePath(filePath);
+    QString relativePath = baseDir.relativeFilePath(filePath);
+    QFileInfo info(absolutePath);
     QSqlQuery q(db);
     q.prepare("INSERT OR REPLACE INTO Uploads (filePath, hash, modified) "
               "VALUES (:filePath, :hash, :modified)");
-    q.bindValue(":filePath", filePath);
-    q.bindValue(":hash", computeHash(filePath));
+    q.bindValue(":filePath", relativePath);
+    q.bindValue(":hash", computeHash(absolutePath));
     q.bindValue(":modified", info.lastModified().toString(Qt::ISODate));
     if (!q.exec()) {
         qWarning() << "Error executing query:" << q.lastError();
@@ -128,10 +130,13 @@ void FileLogPrivate::addFile(const QString &filePath)
 
 bool FileLogPrivate::isLogged(const QString &filePath) const
 {
+    QString absolutePath = baseDir.absoluteFilePath(filePath);
+    QString relativePath = baseDir.relativeFilePath(filePath);
+
     QSqlQuery q(db);
     q.prepare("SELECT hash, modified FROM Uploads "
               "WHERE filePath = :filePath");
-    q.bindValue(":filePath", filePath);
+    q.bindValue(":filePath", relativePath);
     if (!q.exec()) {
         qWarning() << "Error executing query:" << q.lastError();
         return false;
@@ -141,13 +146,13 @@ bool FileLogPrivate::isLogged(const QString &filePath) const
 
     /* If the last modification time is the same as the logged file, we trust
      * that it's the same file and we don't check the hash */
-    QFileInfo info(basePath + QDir::separator() + filePath);
+    QFileInfo info(absolutePath);
     QString lastModified = info.lastModified().toString(Qt::ISODate);
     if (q.value(1).toString() == lastModified) return true;
 
     /* If the times differ, it might still be the same file; let's check the
      * hash */
-    if (q.value(0).toString() == computeHash(filePath)) return true;
+    if (q.value(0).toString() == computeHash(absolutePath)) return true;
 
     return false;
 }
@@ -186,7 +191,7 @@ void FileLog::clear()
 void FileLog::setBasePath(const QString &path)
 {
     Q_D(FileLog);
-    d->basePath = path;
+    d->baseDir.setPath(path);
 }
 
 void FileLog::addFile(const QString &filePath)
