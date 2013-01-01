@@ -35,7 +35,7 @@ class FileLogPrivate
 
     bool isLogged(const QString &filePath) const;
     QStringList filterOutLogged(const QStringList &allFiles) const;
-    void addFile(const QString &filePath);
+    void addFile(const QString &filePath, const QByteArray &fileHash);
 
 private:
     bool initDb();
@@ -112,7 +112,8 @@ QString FileLogPrivate::computeHash(const QString &filePath) const
     return QString(hash.result().toHex());
 }
 
-void FileLogPrivate::addFile(const QString &filePath)
+void FileLogPrivate::addFile(const QString &filePath,
+                             const QByteArray &fileHash)
 {
     QString absolutePath = baseDir.absoluteFilePath(filePath);
     QString relativePath = baseDir.relativeFilePath(filePath);
@@ -121,7 +122,8 @@ void FileLogPrivate::addFile(const QString &filePath)
     q.prepare("INSERT OR REPLACE INTO Uploads (filePath, hash, modified) "
               "VALUES (:filePath, :hash, :modified)");
     q.bindValue(":filePath", relativePath);
-    q.bindValue(":hash", computeHash(absolutePath));
+    QString hash = fileHash.isEmpty() ? computeHash(absolutePath) : fileHash;
+    q.bindValue(":hash", hash);
     q.bindValue(":modified", info.lastModified().toString(Qt::ISODate));
     if (!q.exec()) {
         qWarning() << "Error executing query:" << q.lastError();
@@ -194,10 +196,10 @@ void FileLog::setBasePath(const QString &path)
     d->baseDir.setPath(path);
 }
 
-void FileLog::addFile(const QString &filePath)
+void FileLog::addFile(const QString &filePath, const QByteArray &fileHash)
 {
     Q_D(FileLog);
-    return d->addFile(filePath);
+    return d->addFile(filePath, fileHash);
 }
 
 bool FileLog::isLogged(const QString &filePath) const

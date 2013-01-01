@@ -17,6 +17,7 @@
 #include "upload-queue.h"
 
 #include <QDateTime>
+#include <QDir>
 #include <QUrl>
 
 using namespace ABC;
@@ -98,10 +99,12 @@ void ControllerPrivate::onDirectoryChanged()
     if (changedFiles.isEmpty()) return;
 
     UploadQueue *uploadQueue = Application::instance()->uploadQueue();
+    QDir baseDir(watcher.basePath());
 
     foreach (const QString &fileName, changedFiles) {
         DEBUG() << "File:" << fileName;
-        uploadQueue->requestUpload(fileName);
+        uploadQueue->requestUpload(fileName,
+                                   baseDir.relativeFilePath(fileName));
     }
 
     lastUpdateTime = newLastUpdateTime;

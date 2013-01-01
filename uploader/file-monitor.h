@@ -27,6 +27,8 @@ public:
     virtual ~FileMonitor();
 
     void setBasePath(const QString &path);
+    QString basePath() const;
+
     QStringList filesChangedSince(const QDateTime &since) const;
 
 Q_SIGNALS:

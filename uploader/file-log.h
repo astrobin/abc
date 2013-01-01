@@ -33,7 +33,8 @@ public:
     QStringList filterOutLogged(const QStringList &allFiles) const;
 
 public Q_SLOTS:
-    void addFile(const QString &filePath);
+    void addFile(const QString &filePath,
+                 const QByteArray &fileHash = QByteArray());
 
 private:
     FileLogPrivate *d_ptr;

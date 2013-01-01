@@ -158,6 +158,12 @@ void FileMonitor::setBasePath(const QString &path)
     return d->setBasePath(path);
 }
 
+QString FileMonitor::basePath() const
+{
+    Q_D(const FileMonitor);
+    return d->basePath;
+}
+
 QStringList FileMonitor::filesChangedSince(const QDateTime &since) const
 {
     Q_D(const FileMonitor);

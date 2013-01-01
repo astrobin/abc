@@ -115,7 +115,7 @@ void UploadQueuePrivate::runQueue()
             rescheduled++;
         } else {
             activeUploads.insert(item);
-            item->startUpload();
+            item->startUpload(site);
         }
     } while (activeUploads.count() < MAX_UPLOADS &&
              rescheduled < numItems);
@@ -166,17 +166,18 @@ UploadQueue::~UploadQueue()
     d_ptr = 0;
 }
 
-void UploadQueue::requestUpload(const QString &fileName)
+void UploadQueue::requestUpload(const QString &filePath,
+                                const QString &fileName)
 {
     Q_D(UploadQueue);
 
-    if (d->fileMap.contains(fileName)) {
+    if (d->fileMap.contains(filePath)) {
         /* TODO: if the upload is in progress, check the file's last
          * modification time and, if needed, re-start the download. */
         return;
     }
 
-    UploadItem *item = new UploadItem(fileName, this);
+    UploadItem *item = new UploadItem(filePath, fileName, this);
     QObject::connect(item, SIGNAL(progressChanged(int)),
                      d, SLOT(onProgressChanged(int)));
 
@@ -184,7 +185,7 @@ void UploadQueue::requestUpload(const QString &fileName)
     int index = rowCount(root);
     beginInsertRows(root, index, index);
     d->items.append(item);
-    d->fileMap.insert(fileName, item);
+    d->fileMap.insert(filePath, item);
     d->queue.enqueue(item);
     endInsertRows();
 
