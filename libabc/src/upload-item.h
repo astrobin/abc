@@ -21,11 +21,14 @@
 #ifndef ABC_UPLOAD_ITEM_H
 #define ABC_UPLOAD_ITEM_H
 
+#include <QByteArray>
 #include <QMetaType>
 #include <QObject>
 #include <QString>
 
 namespace ABC {
+
+class Site;
 
 class UploadItemPrivate;
 class UploadItem: public QObject
@@ -33,14 +36,20 @@ class UploadItem: public QObject
     Q_OBJECT
 
 public:
-    UploadItem(const QString &fileName, QObject *parent = 0);
+    UploadItem(const QString &filePath,
+               const QString &fileName,
+               QObject *parent = 0);
     virtual ~UploadItem();
 
+    void setBasePath(const QString &path);
+
+    QString filePath() const;
     QString fileName() const;
+    QByteArray fileHash() const;
     int progress() const;
 
 public Q_SLOTS:
-    void startUpload();
+    void startUpload(Site *site);
 
 Q_SIGNALS:
     void progressChanged(int progress);
