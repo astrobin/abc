@@ -21,6 +21,9 @@
 #include "debug.h"
 #include "site.h"
 
+#include <QFile>
+#include <QFileInfo>
+#include <QHttpMultiPart>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -34,6 +37,7 @@
 
 static const QLatin1String API_URL(API_BASE_URL);
 static const QLatin1String AUTH_URL(API_BASE_URL "/api-token-auth");
+static const QLatin1String UPLOAD_URL(API_BASE_URL "/rawdata/rawimages/");
 
 using namespace ABC;
 
@@ -53,6 +57,9 @@ class SitePrivate: public QObject
                   const QString &message = QString());
     bool handleNetworkError(QNetworkReply *reply);
     QByteArray accessTokenFromReply(QNetworkReply *reply);
+
+    QNetworkReply *uploadFile(const QString &filePath,
+                              const QList<QHttpPart> &extraParts);
 
 private Q_SLOTS:
     void onAuthenticateReply();
@@ -194,6 +201,40 @@ void SitePrivate::onSslErrors(QList<QSslError> errors)
     // TODO
 }
 
+QNetworkReply *SitePrivate::uploadFile(const QString &filePath,
+                                       const QList<QHttpPart> &extraParts)
+{
+    ensureHasNetworkAccessManager();
+
+    QHttpMultiPart *multiPart =
+        new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QFile *file = new QFile(filePath, multiPart);
+    file->open(QIODevice::ReadOnly);
+
+    QHttpPart upload;
+    QByteArray contentDisposition =
+        "form-data; name=\"file\"; filename =\"";
+    QFileInfo info(filePath);
+    contentDisposition += info.completeBaseName().replace('"', '_').toUtf8();
+    contentDisposition += '"';
+    upload.setHeader(QNetworkRequest::ContentDispositionHeader,
+                     contentDisposition);
+    upload.setBodyDevice(file);
+
+    multiPart->append(upload);
+
+    foreach (const QHttpPart &part, extraParts) {
+        multiPart->append(part);
+    }
+
+    QUrl uploadUrl(UPLOAD_URL);
+    QNetworkRequest request(uploadUrl);
+    QNetworkReply *reply = nam->put(request, multiPart);
+    multiPart->setParent(reply);
+
+    return reply;
+}
+
 Site::Site(QObject *parent):
     QObject(parent),
     d_ptr(new SitePrivate(this))
@@ -237,6 +278,13 @@ bool Site::isAuthenticated() const
 {
     Q_D(const Site);
     return !d->accessToken.isEmpty();
+}
+
+QNetworkReply *Site::uploadFile(const QString &filePath,
+                                const QList<QHttpPart> &extraParts)
+{
+    Q_D(Site);
+    return d->uploadFile(filePath, extraParts);
 }
 
 void Site::authenticate()

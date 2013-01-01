@@ -21,10 +21,13 @@
 #ifndef ABC_SITE_H
 #define ABC_SITE_H
 
+#include <QList>
 #include <QObject>
 #include <QString>
 
+class QHttpPart;
 class QNetworkAccessManager;
+class QNetworkReply;
 
 namespace ABC {
 
@@ -56,6 +59,9 @@ public:
 
     ErrorCode lastError() const;
     QString lastErrorMessage() const;
+
+    QNetworkReply *uploadFile(const QString &filePath,
+                              const QList<QHttpPart> &extraParts);
 
 public Q_SLOTS:
     void authenticate();
