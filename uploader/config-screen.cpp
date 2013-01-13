@@ -38,7 +38,7 @@ ConfigScreen::ConfigScreen(QWidget *parent):
     wPassword = new QLineEdit;
     wPassword->setEchoMode(QLineEdit::Password);
     loginForm->addRow(tr("Password:"), wPassword);
-    wUserName->setText(configuration->password());
+    wPassword->setText(configuration->password());
 
     QGroupBox *loginGroup = new QGroupBox(tr("Site authentication"));
     loginGroup->setLayout(loginForm);
