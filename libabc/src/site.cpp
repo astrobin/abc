@@ -235,6 +235,7 @@ QNetworkReply *SitePrivate::uploadFile(const QString &filePath,
 
     QUrl uploadUrl(UPLOAD_URL);
     QNetworkRequest request(uploadUrl);
+    request.setRawHeader("Authorization", "Token " + accessToken);
     QNetworkReply *reply = nam->put(request, multiPart);
     multiPart->setParent(reply);
 
