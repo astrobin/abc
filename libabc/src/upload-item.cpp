@@ -55,6 +55,8 @@ private:
     QDir baseDir;
     QByteArray fileHash;
     int progress;
+    Site::ErrorCode lastError;
+    QString lastErrorMessage;
     mutable UploadItem *q_ptr;
 };
 
@@ -66,6 +68,7 @@ UploadItemPrivate::UploadItemPrivate(const QString &filePath,
     filePath(filePath),
     fileName(fileName),
     progress(0),
+    lastError(Site::UnknownError),
     q_ptr(q)
 {
 }
@@ -81,9 +84,7 @@ void UploadItemPrivate::computeHash()
 
 void UploadItemPrivate::startUpload(Site *site)
 {
-    Q_Q(UploadItem);
-
-    /* Compute the file hash */
+    computeHash();
 
     QList<QHttpPart> parts;
 
@@ -100,11 +101,7 @@ void UploadItemPrivate::startUpload(Site *site)
     parts.append(pathPart);
 
     QNetworkReply *reply = site->uploadFile(filePath, parts);
-    if (Q_UNLIKELY(reply == 0)) {
-        // TODO: better error handling
-        Q_EMIT q->progressChanged(-1);
-        return;
-    }
+    Q_ASSERT(reply != 0);
 
     QObject::connect(reply, SIGNAL(uploadProgress(qint64, qint64)),
                      this, SLOT(onUploadProgress(qint64, qint64)));
@@ -115,9 +112,11 @@ void UploadItemPrivate::startUpload(Site *site)
 bool UploadItemPrivate::checkReply(QNetworkReply *reply)
 {
     if (reply->error() != QNetworkReply::NoError) {
-        // TODO: better error handling
         qWarning() << "Network error while uploading " << fileName <<
             ":" << reply->errorString();
+        // TODO: better error handling
+        lastError = Site::NetworkError;
+        lastErrorMessage = reply->errorString();
         return false;
     }
 
@@ -187,6 +186,24 @@ int UploadItem::progress() const
 {
     Q_D(const UploadItem);
     return d->progress;
+}
+
+QString UploadItem::lastErrorMessage() const
+{
+    Q_D(const UploadItem);
+    return d->lastErrorMessage;
+}
+
+bool UploadItem::errorIsRecoverable() const
+{
+    Q_D(const UploadItem);
+    switch (d->lastError) {
+    case Site::NetworkError:
+        return true;
+    default:
+        break;
+    }
+    return false;
 }
 
 void UploadItem::startUpload(Site *site)

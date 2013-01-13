@@ -147,11 +147,17 @@ void UploadQueuePrivate::onProgressChanged(int progress)
     activeUploads.remove(item);
 
     if (progress < 0) {
-        // TODO: handle errors (put the item back into the queue?)
+        if (item->errorIsRecoverable()) {
+            /* Put the item in the queue again */
+            // TODO: add a delay
+            queue.enqueue(item);
+        }
     }
 
     QModelIndex modelIndex = q->index(index, 0);
     Q_EMIT q->dataChanged(modelIndex, modelIndex);
+
+    runQueue();
 }
 
 UploadQueue::UploadQueue(QObject *parent):

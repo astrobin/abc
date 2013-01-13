@@ -48,6 +48,9 @@ public:
     QByteArray fileHash() const;
     int progress() const;
 
+    QString lastErrorMessage() const;
+    bool errorIsRecoverable() const;
+
 public Q_SLOTS:
     void startUpload(Site *site);
 
