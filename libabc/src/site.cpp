@@ -70,6 +70,7 @@ private:
     QString userName;
     QString password;
     QByteArray accessToken;
+    bool isAuthenticating;
     QNetworkAccessManager *nam;
 
     Site::ErrorCode lastError;
@@ -82,6 +83,7 @@ private:
 
 SitePrivate::SitePrivate(Site *q):
     QObject(q),
+    isAuthenticating(false),
     nam(0),
     q_ptr(q)
 {
@@ -96,6 +98,9 @@ void SitePrivate::ensureHasNetworkAccessManager()
 
 void SitePrivate::authenticate()
 {
+    if (isAuthenticating) return;
+    isAuthenticating = true;
+
     ensureHasNetworkAccessManager();
 
     // Clear any existing access token
@@ -164,6 +169,7 @@ void SitePrivate::onAuthenticateReply()
 {
     Q_Q(Site);
 
+    isAuthenticating = false;
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
     Q_ASSERT(reply != 0);
 
