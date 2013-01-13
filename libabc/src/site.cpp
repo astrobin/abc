@@ -36,7 +36,7 @@
 #define API_BASE_URL "https://www.astrobin.com/api/v2"
 
 static const QLatin1String API_URL(API_BASE_URL);
-static const QLatin1String AUTH_URL(API_BASE_URL "/api-token-auth");
+static const QLatin1String AUTH_URL(API_BASE_URL "/api-auth-token/");
 static const QLatin1String UPLOAD_URL(API_BASE_URL "/rawdata/rawimages/");
 
 using namespace ABC;
