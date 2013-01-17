@@ -113,7 +113,7 @@ bool UploadItemPrivate::checkReply(QNetworkReply *reply)
 {
     if (reply->error() != QNetworkReply::NoError) {
         qWarning() << "Network error while uploading " << fileName <<
-            ":" << reply->errorString();
+            ":" << reply->errorString() << " / " << reply->readAll().data();
         // TODO: better error handling
         lastError = Site::NetworkError;
         lastErrorMessage = reply->errorString();
