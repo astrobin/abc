@@ -221,7 +221,7 @@ QNetworkReply *SitePrivate::uploadFile(const QString &filePath,
     QByteArray contentDisposition =
         "form-data; name=\"file\"; filename =\"";
     QFileInfo info(filePath);
-    contentDisposition += info.completeBaseName().replace('"', '_').toUtf8();
+    contentDisposition += info.fileName().replace('"', '_').toUtf8();
     contentDisposition += '"';
     upload.setHeader(QNetworkRequest::ContentDispositionHeader,
                      contentDisposition);
