@@ -151,6 +151,8 @@ void UploadQueuePrivate::retryFailed()
     int interval = retryTimer.interval() * 2;
     retryTimer.setInterval(interval < MAX_RETRY_TIME * 1000 ?
                            interval : MAX_RETRY_TIME * 1000);
+
+    runQueue();
 }
 
 void UploadQueuePrivate::onProgressChanged(int progress)
