@@ -19,7 +19,7 @@
 using namespace ABC;
 
 SystemTray::SystemTray(QObject *parent):
-    QSystemTrayIcon(QIcon(":astrobin-systray"), parent)
+    QSystemTrayIcon(QIcon(":default-systray"), parent)
 {
     QObject::connect(this,
                      SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
