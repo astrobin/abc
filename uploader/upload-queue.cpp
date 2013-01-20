@@ -108,6 +108,8 @@ void UploadQueuePrivate::onAuthenticationFinished()
 
 void UploadQueuePrivate::runQueue()
 {
+    Q_Q(UploadQueue);
+
     if (queue.isEmpty() || activeUploads.count() >= MAX_UPLOADS) return;
 
     QDateTime safeUploadTime =
@@ -115,6 +117,7 @@ void UploadQueuePrivate::runQueue()
     int rescheduled = 0;
     int numItems = queue.count();
     do {
+        Q_EMIT q->statusChanged(q->Uploading);
         UploadItem *item = queue.dequeue();
         /* Check that the file hasn't been modified in the last few seconds
          * (because otherwise it might not be complete) */
@@ -130,6 +133,7 @@ void UploadQueuePrivate::runQueue()
     } while (activeUploads.count() < MAX_UPLOADS &&
              rescheduled < numItems);
 
+    Q_EMIT q->statusChanged(q->Idle);
     /* If all items were rescheduled, it means that no files can be
      * safely uploaded at the moment; in that case, let's try again after
      * some time. */
@@ -174,6 +178,7 @@ void UploadQueuePrivate::onProgressChanged(int progress)
     activeUploads.remove(item);
 
     if (item->progress() < 0) {
+        Q_EMIT q->statusChanged(q->Warning);
         if (item->errorIsRecoverable()) {
             retryItems.insert(item);
             if (!retryTimer.isActive())

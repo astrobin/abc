@@ -8,9 +8,11 @@
  */
 
 #include "about-screen.h"
+#include "application.h"
 #include "debug.h"
 #include "status-screen.h"
 #include "system-tray.h"
+#include "upload-queue.h"
 
 #include <QAction>
 #include <QApplication>
@@ -21,6 +23,13 @@ using namespace ABC;
 SystemTray::SystemTray(QObject *parent):
     QSystemTrayIcon(QIcon(":default-systray"), parent)
 {
+    UploadQueue *uploadQueue = Application::instance()->uploadQueue();
+
+    QObject::connect(uploadQueue,
+                     SIGNAL(statusChanged(const UploadQueue::Status)),
+                     this,
+                     SLOT(onUploadQueueStatusChanged(const UploadQueue::Status)));
+
     QObject::connect(this,
                      SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
                      this,
@@ -48,6 +57,28 @@ SystemTray::SystemTray(QObject *parent):
 SystemTray::~SystemTray()
 {
     delete menu;
+}
+
+void SystemTray::onUploadQueueStatusChanged(const UploadQueue::Status status)
+{
+    DEBUG() << "Queue changed status:" << status;
+
+    if (status != previousStatus) {
+        switch (status) {
+            case UploadQueue::Uploading:
+                setIcon(QIcon(":uploading-systray"));
+                break;
+            case UploadQueue::Warning:
+                setIcon(QIcon(":warning-systray"));
+                break;
+            case UploadQueue::Idle:
+            default:
+                if (previousStatus == UploadQueue::Uploading)
+                    setIcon(QIcon(":default-systray"));
+        }
+
+        previousStatus = status;
+    }
 }
 
 void SystemTray::onActivated(QSystemTrayIcon::ActivationReason reason)

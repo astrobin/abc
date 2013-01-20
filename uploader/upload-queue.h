@@ -25,6 +25,12 @@ public:
         UploadItemRole,
     };
 
+    enum Status {
+        Idle = 0,
+        Uploading,
+        Warning,
+    };
+
     UploadQueue(QObject *parent = 0);
     virtual ~UploadQueue();
 
@@ -36,6 +42,9 @@ public:
     QVariant data(const QModelIndex &index,
                   int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
+
+signals:
+    void statusChanged(const UploadQueue::Status status);
 
 private:
     UploadQueuePrivate *d_ptr;

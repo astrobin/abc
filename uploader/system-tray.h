@@ -12,6 +12,8 @@
 
 #include <QSystemTrayIcon>
 
+#include "upload-queue.h"
+
 class QMenu;
 
 namespace ABC {
@@ -25,12 +27,14 @@ public:
     virtual ~SystemTray();
 
 private Q_SLOTS:
+    void onUploadQueueStatusChanged(const UploadQueue::Status status);
     void onActivated(QSystemTrayIcon::ActivationReason reason);
     void showStatus();
     void showAbout();
 
 private:
     QMenu *menu;
+    int previousStatus;
 };
 
 }; // namespace
