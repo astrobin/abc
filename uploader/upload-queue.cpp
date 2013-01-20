@@ -121,7 +121,7 @@ void UploadQueuePrivate::runQueue()
         UploadItem *item = queue.dequeue();
         /* Check that the file hasn't been modified in the last few seconds
          * (because otherwise it might not be complete) */
-        QFileInfo info(item->fileName());
+        QFileInfo info(item->filePath());
         if (info.lastModified() > safeUploadTime) {
             // push the item at the end of the queue
             queue.enqueue(item);
