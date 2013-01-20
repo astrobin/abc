@@ -131,7 +131,8 @@ void UploadQueuePrivate::runQueue()
             item->startUpload(site);
         }
     } while (activeUploads.count() < MAX_UPLOADS &&
-             rescheduled < numItems);
+             rescheduled < numItems &&
+             !queue.isEmpty());
 
     Q_EMIT q->statusChanged(UploadQueue::Idle);
     /* If all items were rescheduled, it means that no files can be
