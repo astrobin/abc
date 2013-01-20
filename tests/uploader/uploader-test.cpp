@@ -1,6 +1,6 @@
 /* vi: set et sw=4 ts=4 cino=t0,(0: */
 /*
- * Copyright (C) 2012 Alberto Mardegan <info@mardy.it>
+ * Copyright (C) 2012-2013 Alberto Mardegan <info@mardy.it>
  *
  * This file is part of ABC (AstroBin Companion).
  *
@@ -13,6 +13,9 @@
 #include "configuration.h"
 #include "file-log.h"
 #include "file-monitor.h"
+#include "mock/site.h"
+#include "mock/upload-item.h"
+#include "upload-queue.h"
 
 #include <QDebug>
 #include <QDir>
@@ -21,6 +24,10 @@
 #define UTF8(s) QString::fromUtf8(s)
 
 using namespace ABC;
+
+/* Handles to mocked objects */
+Site *Site::instance = 0;
+QList<UploadItem *> UploadItem::allItems;
 
 void UploaderTest::initTestCase()
 {
@@ -176,6 +183,37 @@ void UploaderTest::fileLog()
 
     log.addFile("dummy");
     QCOMPARE(log.isLogged("dummy"), true);
+}
+
+void UploaderTest::uploadQueue()
+{
+    UploadQueue queue;
+
+    QCOMPARE(queue.rowCount(), 0);
+    QVERIFY(UploadItem::allItems.isEmpty());
+
+    /* request an upload */
+    queue.requestUpload("a file", "filename");
+    QCOMPARE(queue.rowCount(), 1);
+    QCOMPARE(UploadItem::allItems.count(), 1);
+
+    /* request another one */
+    queue.requestUpload("another file", "filename");
+    QCOMPARE(queue.rowCount(), 2);
+    QCOMPARE(UploadItem::allItems.count(), 2);
+
+    /* request the first item again; the count should not increase */
+    queue.requestUpload("a file", "filename");
+    QCOMPARE(queue.rowCount(), 2);
+    QCOMPARE(UploadItem::allItems.count(), 2);
+
+    QCOMPARE(queue.completedUploads(), 0);
+
+    /* give some time for the uploads to complete; the default time for
+     * the mocked UploadItem and for the site authentication is 10 msecs
+     * each */
+    QTest::qWait(25);
+    QCOMPARE(queue.completedUploads(), 2);
 }
 
 int main(int argc, char **argv)

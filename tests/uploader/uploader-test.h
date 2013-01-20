@@ -1,6 +1,6 @@
 /* vi: set et sw=4 ts=4 cino=t0,(0: */
 /*
- * Copyright (C) 2012 Alberto Mardegan <info@mardy.it>
+ * Copyright (C) 2012-2013 Alberto Mardegan <info@mardy.it>
  *
  * This file is part of ABC (AstroBin Companion).
  *
@@ -23,6 +23,7 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
 
+    void uploadQueue();
     void fileMonitor();
     void fileLog();
 

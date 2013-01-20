@@ -8,16 +8,13 @@ LIBABC = ../../libabc
 SRC = ../../uploader
 
 INCLUDEPATH += \
+    mock \
     $${SRC} \
     $${LIBABC}/include \
     $${LIBABC}/src
 
-QMAKE_LIBDIR += \
-    $${LIBABC}/src
-QMAKE_RPATHDIR = $${QMAKE_LIBDIR}
-
-LIBS += \
-    -labc
+DEPENDPATH += \
+    mock
 
 SOURCES += \
     $${SRC}/application.cpp \
@@ -33,6 +30,8 @@ HEADERS += \
     $${SRC}/file-log.h \
     $${SRC}/file-monitor.h \
     $${SRC}/upload-queue.h \
+    mock/site.h \
+    mock/upload-item.h \
     uploader-test.h
 
 check.commands = ./uploader-test
