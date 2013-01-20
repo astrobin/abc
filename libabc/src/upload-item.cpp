@@ -44,6 +44,7 @@ class UploadItemPrivate: public QObject
 
     bool checkReply(QNetworkReply *reply);
     void computeHash();
+    void updateProgress(int value);
 
 private Q_SLOTS:
     void onUploadProgress(qint64 bytesSent, qint64 bytesTotal);
@@ -128,26 +129,31 @@ bool UploadItemPrivate::checkReply(QNetworkReply *reply)
 void UploadItemPrivate::onUploadProgress(qint64 bytesSent,
                                          qint64 bytesTotal)
 {
-    Q_Q(UploadItem);
-
     DEBUG() << bytesSent << "out of" << bytesTotal;
 
     int progress = (bytesTotal > 0) ? bytesSent * 100 / bytesTotal : 0;
     /* Let's keep 100% for confirmed uploads only */
     if (progress >= 100) progress = 99;
-    Q_EMIT q->progressChanged(progress);
+    updateProgress(progress);
 }
 
 void UploadItemPrivate::onFinished()
 {
-    Q_Q(UploadItem);
-
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
     Q_ASSERT(reply != 0);
 
-    Q_EMIT q->progressChanged(checkReply(reply) ? 100 : -1);
+    updateProgress(checkReply(reply) ? 100 : -1);
 
     reply->deleteLater();
+}
+
+void UploadItemPrivate::updateProgress(int value)
+{
+    Q_Q(UploadItem);
+    if (value != progress) {
+        progress = value;
+        Q_EMIT q->progressChanged(progress);
+    }
 }
 
 UploadItem::UploadItem(const QString &filePath,

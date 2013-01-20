@@ -23,6 +23,8 @@
 
 #define MAX_UPLOADS 2
 #define SAFE_UPLOAD_DELAY   10 // seconds
+#define INITIAL_RETRY_TIME  2 // seconds
+#define MAX_RETRY_TIME      300 // seconds
 
 using namespace ABC;
 
@@ -39,6 +41,7 @@ public Q_SLOTS:
     void authenticate();
     void onAuthenticationFinished();
     void runQueue();
+    void retryFailed();
     void onProgressChanged(int progress);
 
 private:
@@ -47,7 +50,9 @@ private:
     QHash<QString, UploadItem *> fileMap;
     QQueue<UploadItem *> queue;
     QSet<UploadItem *> activeUploads;
+    QSet<UploadItem *> retryItems;
     QTimer runTimer;
+    QTimer retryTimer;
     Site *site;
     mutable UploadQueue *q_ptr;
 };
@@ -63,6 +68,11 @@ UploadQueuePrivate::UploadQueuePrivate(UploadQueue *q):
     runTimer.setInterval(SAFE_UPLOAD_DELAY * 1000);
     QObject::connect(&runTimer, SIGNAL(timeout()),
                      this, SLOT(runQueue()));
+
+    retryTimer.setSingleShot(true);
+    retryTimer.setInterval(INITIAL_RETRY_TIME * 1000);
+    QObject::connect(&retryTimer, SIGNAL(timeout()),
+                     this, SLOT(retryFailed()));
 
     QObject::connect(site, SIGNAL(authenticationFinished()),
                      this, SLOT(onAuthenticationFinished()));
@@ -128,6 +138,23 @@ void UploadQueuePrivate::runQueue()
     }
 }
 
+void UploadQueuePrivate::retryFailed()
+{
+    /* Put all failed items back into the queue, if the error is
+     * recoverable */
+    foreach (UploadItem *item, retryItems) {
+        queue.enqueue(item);
+    }
+
+    /* Increase the retry interval; note that this doesn't start the
+     * timer, it just sets it up for the next time. */
+    int interval = retryTimer.interval() * 2;
+    retryTimer.setInterval(interval < MAX_RETRY_TIME * 1000 ?
+                           interval : MAX_RETRY_TIME * 1000);
+
+    runQueue();
+}
+
 void UploadQueuePrivate::onProgressChanged(int progress)
 {
     Q_Q(UploadQueue);
@@ -146,11 +173,16 @@ void UploadQueuePrivate::onProgressChanged(int progress)
 
     activeUploads.remove(item);
 
-    if (progress < 0) {
+    if (item->progress() < 0) {
         if (item->errorIsRecoverable()) {
-            /* Put the item in the queue again */
-            // TODO: add a delay
-            queue.enqueue(item);
+            retryItems.insert(item);
+            if (!retryTimer.isActive())
+                retryTimer.start();
+        }
+    } else {
+        retryItems.remove(item);
+        if (retryItems.isEmpty()) {
+            retryTimer.setInterval(INITIAL_RETRY_TIME * 1000);
         }
     }
 
