@@ -67,7 +67,8 @@ void StatusScreen::updateProgress()
 {
     UploadQueue *uploadQueue = Application::instance()->uploadQueue();
     int total = uploadQueue->rowCount();
-    int completed = uploadQueue->completedUploads();
+    int completed;
+    uploadQueue->itemsStatus(&completed);
 
     if (completed >= total) {
         progressLabel->setText(tr("Up to date"));

@@ -36,7 +36,8 @@ public:
 
     void requestUpload(const QString &filePath, const QString &fileName);
 
-    int completedUploads() const;
+    void itemsStatus(int *succeeded, int *inProgress = 0,
+                     int *failed = 0, int *retryLater = 0) const;
 
     // reimplemented virtual methods:
     QVariant data(const QModelIndex &index,

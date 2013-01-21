@@ -236,16 +236,33 @@ void UploadQueue::requestUpload(const QString &filePath,
     d->authenticate();
 }
 
-int UploadQueue::completedUploads() const
+void UploadQueue::itemsStatus(int *succeeded, int *inProgress,
+                              int *failed, int *retryLater) const
 {
     Q_D(const UploadQueue);
 
-    int completed = 0;
+    int l_succeeded = 0;
+    int l_inProgress = 0;
+    int l_failed = 0;
+    int l_retryLater = 0;
+
     foreach (const UploadItem *item, d->items) {
-        if (item->progress() >= 100) completed++;
+        int progress = item->progress();
+        if (progress >= 100) l_succeeded++;
+        else if (progress > 0) l_inProgress++;
+        else if (progress < 0) {
+            if (item->errorIsRecoverable()) {
+                l_retryLater++;
+            } else {
+                l_failed++;
+            }
+        }
     }
 
-    return completed;
+    if (succeeded) *succeeded = l_succeeded;
+    if (inProgress) *inProgress = l_inProgress;
+    if (failed) *failed = l_failed;
+    if (retryLater) *retryLater = l_retryLater;
 }
 
 QVariant UploadQueue::data(const QModelIndex &index, int role) const

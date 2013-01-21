@@ -207,13 +207,16 @@ void UploaderTest::uploadQueue()
     QCOMPARE(queue.rowCount(), 2);
     QCOMPARE(UploadItem::allItems.count(), 2);
 
-    QCOMPARE(queue.completedUploads(), 0);
+    int completed = 0;
+    queue.itemsStatus(&completed);
+    QCOMPARE(completed, 0);
 
     /* give some time for the uploads to complete; the default time for
      * the mocked UploadItem and for the site authentication is 10 msecs
      * each */
     QTest::qWait(25);
-    QCOMPARE(queue.completedUploads(), 2);
+    queue.itemsStatus(&completed);
+    QCOMPARE(completed, 2);
 }
 
 int main(int argc, char **argv)
