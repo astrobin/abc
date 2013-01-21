@@ -44,7 +44,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
 signals:
-    void statusChanged(const UploadQueue::Status status);
+    void statusChanged(UploadQueue::Status status);
 
 private:
     UploadQueuePrivate *d_ptr;

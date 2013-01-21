@@ -117,7 +117,7 @@ void UploadQueuePrivate::runQueue()
     int rescheduled = 0;
     int numItems = queue.count();
     do {
-        Q_EMIT q->statusChanged(q->Uploading);
+        Q_EMIT q->statusChanged(UploadQueue::Uploading);
         UploadItem *item = queue.dequeue();
         /* Check that the file hasn't been modified in the last few seconds
          * (because otherwise it might not be complete) */
@@ -133,7 +133,7 @@ void UploadQueuePrivate::runQueue()
     } while (activeUploads.count() < MAX_UPLOADS &&
              rescheduled < numItems);
 
-    Q_EMIT q->statusChanged(q->Idle);
+    Q_EMIT q->statusChanged(UploadQueue::Idle);
     /* If all items were rescheduled, it means that no files can be
      * safely uploaded at the moment; in that case, let's try again after
      * some time. */
@@ -178,7 +178,7 @@ void UploadQueuePrivate::onProgressChanged(int progress)
     activeUploads.remove(item);
 
     if (item->progress() < 0) {
-        Q_EMIT q->statusChanged(q->Warning);
+        Q_EMIT q->statusChanged(UploadQueue::Warning);
         if (item->errorIsRecoverable()) {
             retryItems.insert(item);
             if (!retryTimer.isActive())

@@ -26,9 +26,9 @@ SystemTray::SystemTray(QObject *parent):
     UploadQueue *uploadQueue = Application::instance()->uploadQueue();
 
     QObject::connect(uploadQueue,
-                     SIGNAL(statusChanged(const UploadQueue::Status)),
+                     SIGNAL(statusChanged(UploadQueue::Status)),
                      this,
-                     SLOT(onUploadQueueStatusChanged(const UploadQueue::Status)));
+                     SLOT(onUploadQueueStatusChanged(UploadQueue::Status)));
 
     QObject::connect(this,
                      SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
@@ -59,22 +59,22 @@ SystemTray::~SystemTray()
     delete menu;
 }
 
-void SystemTray::onUploadQueueStatusChanged(const UploadQueue::Status status)
+void SystemTray::onUploadQueueStatusChanged(UploadQueue::Status status)
 {
     DEBUG() << "Queue changed status:" << status;
 
     if (status != previousStatus) {
         switch (status) {
-            case UploadQueue::Uploading:
-                setIcon(QIcon(":uploading-systray"));
-                break;
-            case UploadQueue::Warning:
-                setIcon(QIcon(":warning-systray"));
-                break;
-            case UploadQueue::Idle:
-            default:
-                if (previousStatus == UploadQueue::Uploading)
-                    setIcon(QIcon(":default-systray"));
+        case UploadQueue::Uploading:
+            setIcon(QIcon(":uploading-systray"));
+            break;
+        case UploadQueue::Warning:
+            setIcon(QIcon(":warning-systray"));
+            break;
+        case UploadQueue::Idle:
+        default:
+            if (previousStatus == UploadQueue::Uploading)
+                setIcon(QIcon(":default-systray"));
         }
 
         previousStatus = status;
