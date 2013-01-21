@@ -76,6 +76,9 @@ public:
         return 0;
     }
 
+    /* Methods useful for mocking */
+    void authenticateAfter(int msec) { m_authTimer.setInterval(msec); }
+
 private Q_SLOTS:
     void finishAuthentication() {
         m_isAuthenticated = true;

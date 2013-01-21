@@ -219,6 +219,81 @@ void UploaderTest::uploadQueue()
     QCOMPARE(completed, 2);
 }
 
+void UploaderTest::uploadQueueRetry()
+{
+    UploadQueue queue;
+
+    /* shorten the authentication time */
+    QVERIFY(Site::instance != 0);
+    Site::instance->authenticateAfter(0);
+
+    QCOMPARE(queue.rowCount(), 0);
+    QVERIFY(UploadItem::allItems.isEmpty());
+
+    /* request a few uploads, some of which will fail */
+    queue.requestUpload("file1", "file1");
+    queue.requestUpload("file2", "file2");
+    UploadItem *file2 = UploadItem::allItems.last();
+    file2->failAfter(5, true);
+    queue.requestUpload("file3", "file3");
+    UploadItem::allItems.last()->failAfter(20, false);
+    queue.requestUpload("file4", "file4");
+    UploadItem *file4 = UploadItem::allItems.last();
+    file4->failAfter(30, true);
+
+    QCOMPARE(queue.rowCount(), 4);
+    int completed = 0;
+    int inProgress = 0;
+    int failed = 0;
+    int retryLater = 0;
+    queue.itemsStatus(&completed, &inProgress, &failed, &retryLater);
+    QCOMPARE(completed, 0);
+
+    /* periodically check the upload status */
+    QTest::qWait(15);
+    queue.itemsStatus(&completed, &inProgress, &failed, &retryLater);
+    QCOMPARE(completed, 1);
+    QCOMPARE(inProgress, 2);
+    QCOMPARE(failed, 0);
+    QCOMPARE(retryLater, 1);
+
+    QTest::qWait(15);
+    queue.itemsStatus(&completed, &inProgress, &failed, &retryLater);
+    QCOMPARE(completed, 1);
+    QCOMPARE(inProgress, 1);
+    QCOMPARE(failed, 1);
+    QCOMPARE(retryLater, 1);
+
+    QTest::qWait(20);
+    queue.itemsStatus(&completed, &inProgress, &failed, &retryLater);
+    QCOMPARE(completed, 1);
+    QCOMPARE(inProgress, 0);
+    QCOMPARE(failed, 1);
+    QCOMPARE(retryLater, 2);
+
+    /* Change the recoverable so that next time they'll upload
+     * successfully */
+    file2->succeedAfter(10);
+    file4->succeedAfter(20);
+
+    /* After one second, the situation should still be the same */
+    QTest::qWait(1000);
+    queue.itemsStatus(&completed, &inProgress, &failed, &retryLater);
+    QCOMPARE(completed, 1);
+    QCOMPARE(inProgress, 0);
+    QCOMPARE(failed, 1);
+    QCOMPARE(retryLater, 2);
+
+    /* After two seconds, UploadQueue should retry the recoverable failed
+     * items; let's add some time to actually let the uploads complete */
+    QTest::qWait(1100);
+    queue.itemsStatus(&completed, &inProgress, &failed, &retryLater);
+    QCOMPARE(completed, 3);
+    QCOMPARE(inProgress, 0);
+    QCOMPARE(failed, 1);
+    QCOMPARE(retryLater, 0);
+}
+
 int main(int argc, char **argv)
 {
     Application app(argc, argv);

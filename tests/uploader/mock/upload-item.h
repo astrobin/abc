@@ -76,6 +76,8 @@ private Q_SLOTS:
 public Q_SLOTS:
     void startUpload(Site *site) {
         Q_UNUSED(site);
+        m_progress = 1;
+        Q_EMIT progressChanged(m_progress);
         m_replyTimer.start();
     }
 

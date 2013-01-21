@@ -24,6 +24,7 @@ private Q_SLOTS:
     void cleanupTestCase();
 
     void uploadQueue();
+    void uploadQueueRetry();
     void fileMonitor();
     void fileLog();
 
