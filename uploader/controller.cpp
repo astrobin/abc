@@ -16,6 +16,7 @@
 #include "upload-item.h"
 #include "upload-queue.h"
 
+#include <ABC/Site>
 #include <QDateTime>
 #include <QDir>
 #include <QUrl>
@@ -32,6 +33,8 @@ class ControllerPrivate: public QObject
     ControllerPrivate(Controller *q);
 
 private Q_SLOTS:
+    void doLogin();
+    void onLoginDataChanged();
     void onUploadPathChanged();
     void onDirectoryChanged();
     void onDataChanged(const QModelIndex &first, const QModelIndex &last);
@@ -40,6 +43,7 @@ private:
     QDateTime lastUpdateTime;
     FileMonitor watcher;
     FileLog fileLog;
+    bool loginScheduled;
     mutable Controller *q_ptr;
 };
 
@@ -47,12 +51,17 @@ private:
 
 ControllerPrivate::ControllerPrivate(Controller *q):
     QObject(q),
+    loginScheduled(false),
     q_ptr(q)
 {
     Configuration *configuration =
        Application::instance()->configuration();
     QObject::connect(configuration, SIGNAL(uploadPathChanged()),
                      this, SLOT(onUploadPathChanged()));
+    QObject::connect(configuration, SIGNAL(userNameChanged()),
+                     this, SLOT(onLoginDataChanged()));
+    QObject::connect(configuration, SIGNAL(passwordChanged()),
+                     this, SLOT(onLoginDataChanged()));
 
     QObject::connect(&watcher, SIGNAL(changed()),
                      this, SLOT(onDirectoryChanged()));
@@ -62,6 +71,8 @@ ControllerPrivate::ControllerPrivate(Controller *q):
 
     /* Monitor completed uploads (and update the FileLog) */
     UploadQueue *uploadQueue = Application::instance()->uploadQueue();
+    uploadQueue->site()->setLoginData(configuration->userName(),
+                                      configuration->password());
     connect(uploadQueue,
             SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
             this,
@@ -69,6 +80,24 @@ ControllerPrivate::ControllerPrivate(Controller *q):
 
     /* Force a refresh */
     onDirectoryChanged();
+}
+
+void ControllerPrivate::doLogin()
+{
+    Configuration *configuration =
+       Application::instance()->configuration();
+    UploadQueue *uploadQueue = Application::instance()->uploadQueue();
+    uploadQueue->site()->setLoginData(configuration->userName(),
+                                      configuration->password());
+    uploadQueue->site()->authenticate();
+    loginScheduled = false;
+}
+
+void ControllerPrivate::onLoginDataChanged()
+{
+    if (loginScheduled) return;
+    loginScheduled = true;
+    QMetaObject::invokeMethod(this, "doLogin", Qt::QueuedConnection);
 }
 
 void ControllerPrivate::onUploadPathChanged()

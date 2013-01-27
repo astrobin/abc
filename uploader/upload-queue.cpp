@@ -86,11 +86,6 @@ void UploadQueuePrivate::authenticate()
         return;
     }
 
-    Configuration *configuration =
-       Application::instance()->configuration();
-
-    site->setLoginData(configuration->userName(),
-                       configuration->password());
     site->authenticate();
 }
 
@@ -208,6 +203,12 @@ UploadQueue::~UploadQueue()
 {
     delete d_ptr;
     d_ptr = 0;
+}
+
+Site *UploadQueue::site() const
+{
+    Q_D(const UploadQueue);
+    return d->site;
 }
 
 void UploadQueue::requestUpload(const QString &filePath,

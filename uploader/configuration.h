@@ -40,6 +40,8 @@ public:
     QString logDbPath() const;
 
 Q_SIGNALS:
+    void userNameChanged();
+    void passwordChanged();
     void uploadPathChanged();
 
 private:

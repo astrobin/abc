@@ -14,6 +14,8 @@
 
 namespace ABC {
 
+class Site;
+
 class UploadQueuePrivate;
 class UploadQueue: public QAbstractListModel
 {
@@ -33,6 +35,8 @@ public:
 
     UploadQueue(QObject *parent = 0);
     virtual ~UploadQueue();
+
+    Site *site() const;
 
     void requestUpload(const QString &filePath, const QString &fileName);
 

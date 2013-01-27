@@ -55,7 +55,10 @@ Configuration::~Configuration()
 
 void Configuration::setUserName(const QString &userName)
 {
+    if (userName == this->userName()) return;
+
     setValue(keyUserName, userName);
+    Q_EMIT userNameChanged();
 }
 
 QString Configuration::userName() const
@@ -65,7 +68,10 @@ QString Configuration::userName() const
 
 void Configuration::setPassword(const QString &password)
 {
+    if (password == this->password()) return;
+
     setValue(keyPassword, password);
+    Q_EMIT passwordChanged();
 }
 
 QString Configuration::password() const
