@@ -12,6 +12,8 @@
 
 #include <QApplication>
 
+class QNetworkAccessManager;
+
 namespace ABC {
 
 class Configuration;
@@ -32,6 +34,7 @@ public:
 
     Configuration *configuration() const;
     UploadQueue *uploadQueue() const;
+    QNetworkAccessManager *nam() const;
 
 private:
     ApplicationPrivate *d_ptr;

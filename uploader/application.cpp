@@ -12,6 +12,8 @@
 #include "debug.h"
 #include "upload-queue.h"
 
+#include <QNetworkAccessManager>
+
 using namespace ABC;
 
 namespace ABC {
@@ -23,6 +25,7 @@ class ApplicationPrivate
     ApplicationPrivate(Application *q);
 
 private:
+    mutable QNetworkAccessManager nam;
     mutable Configuration *configuration;
     mutable UploadQueue *uploadQueue;
     mutable Application *q_ptr;
@@ -69,4 +72,10 @@ UploadQueue *Application::uploadQueue() const
         d->uploadQueue = new UploadQueue(const_cast<Application *>(this));
     }
     return d->uploadQueue;
+}
+
+QNetworkAccessManager *Application::nam() const
+{
+    Q_D(const Application);
+    return &d->nam;
 }

@@ -2,6 +2,7 @@ TARGET = abc-uploader
 
 QT += \
     gui \
+    network \
     sql
 
 LIBABC = ../libabc
