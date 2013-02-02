@@ -1,9 +1,17 @@
+include(../common-config.pri)
+
 TARGET = abc-uploader
 
 QT += \
     gui \
     network \
     sql
+
+CONFIG += \
+    link_pkgconfig
+
+PKGCONFIG += \
+    QJson
 
 LIBABC = ../libabc
 
@@ -18,6 +26,8 @@ QMAKE_RPATHDIR = $${QMAKE_LIBDIR}
 LIBS += \
     -labc
 
+DEFINES += PROJECT_VERSION=\\\"$${PROJECT_VERSION}\\\"
+
 SOURCES += \
     about-screen.cpp \
     application.cpp \
@@ -29,6 +39,7 @@ SOURCES += \
     main.cpp \
     status-screen.cpp \
     system-tray.cpp \
+    updater.cpp \
     upload-queue.cpp
 
 HEADERS += \
@@ -42,6 +53,7 @@ HEADERS += \
     file-monitor.h \
     status-screen.h \
     system-tray.h \
+    updater.h \
     upload-queue.h
 
 RESOURCES += \
