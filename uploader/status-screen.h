@@ -13,6 +13,7 @@
 #include <QDialog>
 
 class QLabel;
+class QUrl;
 
 namespace ABC {
 
@@ -24,6 +25,8 @@ public:
     static StatusScreen *instance();
     virtual ~StatusScreen();
 
+    void setUpdate(const QString &version, const QUrl &fileUrl);
+
 private:
     StatusScreen(QWidget *parent = 0);
 
@@ -33,6 +36,7 @@ private Q_SLOTS:
 
 private:
     QLabel *progressLabel;
+    QLabel *updateLabel;
 };
 
 }; // namespace

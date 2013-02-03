@@ -10,6 +10,7 @@
 #include "application.h"
 #include "configuration.h"
 #include "debug.h"
+#include "updater.h"
 #include "upload-queue.h"
 
 #include <QNetworkAccessManager>
@@ -28,6 +29,7 @@ private:
     mutable QNetworkAccessManager nam;
     mutable Configuration *configuration;
     mutable UploadQueue *uploadQueue;
+    mutable Updater *updater;
     mutable Application *q_ptr;
 };
 
@@ -36,6 +38,7 @@ private:
 ApplicationPrivate::ApplicationPrivate(Application *q):
     configuration(0),
     uploadQueue(0),
+    updater(0),
     q_ptr(q)
 {
 }
@@ -72,6 +75,15 @@ UploadQueue *Application::uploadQueue() const
         d->uploadQueue = new UploadQueue(const_cast<Application *>(this));
     }
     return d->uploadQueue;
+}
+
+Updater *Application::updater() const
+{
+    Q_D(const Application);
+    if (d->updater == 0) {
+        d->updater = new Updater(&d->nam, const_cast<Application *>(this));
+    }
+    return d->updater;
 }
 
 QNetworkAccessManager *Application::nam() const

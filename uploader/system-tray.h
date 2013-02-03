@@ -31,6 +31,7 @@ private Q_SLOTS:
     void onActivated(QSystemTrayIcon::ActivationReason reason);
     void showStatus();
     void showAbout();
+    void onUpdateCheckFinished();
 
 private:
     QMenu *menu;

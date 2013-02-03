@@ -17,6 +17,7 @@ class QNetworkAccessManager;
 namespace ABC {
 
 class Configuration;
+class Updater;
 class UploadQueue;
 
 class ApplicationPrivate;
@@ -35,6 +36,7 @@ public:
     Configuration *configuration() const;
     UploadQueue *uploadQueue() const;
     QNetworkAccessManager *nam() const;
+    Updater *updater() const;
 
 private:
     ApplicationPrivate *d_ptr;

@@ -15,6 +15,7 @@
 
 #include <QLabel>
 #include <QPushButton>
+#include <QUrl>
 #include <QVBoxLayout>
 
 using namespace ABC;
@@ -28,6 +29,12 @@ StatusScreen::StatusScreen(QWidget *parent):
 
     progressLabel = new QLabel;
     layout->addWidget(progressLabel);
+
+    updateLabel = new QLabel;
+    updateLabel->setTextFormat(Qt::RichText);
+    updateLabel->setOpenExternalLinks(true);
+    updateLabel->setVisible(false);
+    layout->addWidget(updateLabel);
 
     QPushButton *configButton = new QPushButton(tr("Configure..."));
     QObject::connect(configButton, SIGNAL(clicked()),
@@ -61,6 +68,14 @@ StatusScreen *StatusScreen::instance()
     }
 
     return sharedInstance;
+}
+
+void StatusScreen::setUpdate(const QString &version, const QUrl &fileUrl)
+{
+    updateLabel->setText(tr("A new version (%1) of Astrobin Uploader "
+                            "is available! <a href=\"%2\">Get it here!</a>").
+                         arg(version).arg(fileUrl.toString()));
+    updateLabel->show();
 }
 
 void StatusScreen::updateProgress()

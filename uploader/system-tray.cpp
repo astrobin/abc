@@ -12,11 +12,13 @@
 #include "debug.h"
 #include "status-screen.h"
 #include "system-tray.h"
+#include "updater.h"
 #include "upload-queue.h"
 
 #include <QAction>
 #include <QApplication>
 #include <QMenu>
+#include <QUrl>
 
 using namespace ABC;
 
@@ -52,6 +54,12 @@ SystemTray::SystemTray(QObject *parent):
     menu->addAction(aboutAction);
     menu->addAction(quitAction);
     setContextMenu(menu);
+
+    /* Check for updates */
+    Updater *updater = Application::instance()->updater();
+    QObject::connect(updater, SIGNAL(checkFinished()),
+                     this, SLOT(onUpdateCheckFinished()));
+    updater->checkForUpdates();
 }
 
 SystemTray::~SystemTray()
@@ -102,4 +110,16 @@ void SystemTray::showAbout()
     AboutScreen *aboutScreen = new AboutScreen;
     aboutScreen->exec();
     delete aboutScreen;
+}
+
+void SystemTray::onUpdateCheckFinished()
+{
+    Updater *updater = qobject_cast<Updater *>(sender());
+
+    DEBUG() << "Latest version:" << updater->latestVersion();
+
+    if (updater->updateAvailable()) {
+        StatusScreen *statusScreen = StatusScreen::instance();
+        statusScreen->setUpdate(updater->latestVersion(), updater->fileUrl());
+    }
 }
