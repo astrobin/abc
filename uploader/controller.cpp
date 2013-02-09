@@ -73,9 +73,11 @@ ControllerPrivate::ControllerPrivate(Controller *q):
 
     QObject::connect(&watcher, SIGNAL(changed()),
                      this, SLOT(onDirectoryChanged()));
-    watcher.setBasePath(configuration->uploadPath());
-
-    fileLog.setBasePath(configuration->uploadPath());
+    QString basePath = configuration->uploadPath();
+    if (!basePath.isEmpty()) {
+        watcher.setBasePath(basePath);
+        fileLog.setBasePath(basePath);
+    }
 
     /* Monitor completed uploads (and update the FileLog) */
     UploadQueue *uploadQueue = Application::instance()->uploadQueue();
@@ -87,7 +89,9 @@ ControllerPrivate::ControllerPrivate(Controller *q):
             SLOT(onDataChanged(const QModelIndex &, const QModelIndex &)));
 
     /* Force a refresh */
-    onDirectoryChanged();
+    if (!basePath.isEmpty()) {
+        onDirectoryChanged();
+    }
 }
 
 void ControllerPrivate::doLogin()
@@ -112,8 +116,11 @@ void ControllerPrivate::onUploadPathChanged()
 {
     Configuration *configuration =
        Application::instance()->configuration();
-    watcher.setBasePath(configuration->uploadPath());
-    fileLog.setBasePath(configuration->uploadPath());
+    QString basePath = configuration->uploadPath();
+    if (!basePath.isEmpty()) {
+        watcher.setBasePath(basePath);
+        fileLog.setBasePath(basePath);
+    }
 
     /* The last upload time needs to be reset, since this is a new
      * directory and we'd better check every file in it. */
