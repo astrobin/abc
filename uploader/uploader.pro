@@ -58,3 +58,19 @@ HEADERS += \
 
 RESOURCES += \
     data/icons.qrc
+
+unix {
+    QMAKE_SUBSTITUTES += \
+        data/abc-uploader.desktop.in
+
+    desktopfile.files = data/abc-uploader.desktop
+    desktopfile.path = $${INSTALL_PREFIX}/share/applications
+    INSTALLS += desktopfile
+
+    icon.files = data/application-icons/abc-uploader.svg
+    icon.path = $${INSTALL_PREFIX}/share/icons/hicolor/scalable/apps
+    INSTALLS += icon
+
+    target.path = $${INSTALL_PREFIX}/bin
+    INSTALLS += target
+}

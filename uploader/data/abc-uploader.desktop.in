@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=AstroBin Uploader
+Comment=Upload your astrophotographic data to astrobin.com
+Type=Application
+Terminal=false
+Exec=$$INSTALL_PREFIX/bin/abc-uploader
+Icon=abc-uploader
+Categories=Utility;Archiving;
