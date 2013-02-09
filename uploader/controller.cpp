@@ -19,6 +19,8 @@
 #include <ABC/Site>
 #include <QDateTime>
 #include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QUrl>
 
 using namespace ABC;
@@ -175,6 +177,26 @@ void ControllerPrivate::onAutoStartChanged(bool autoStart)
         settings.setValue("abc-uploader", "\"" + path + "\"");
     } else {
         settings.remove("abc-uploader");
+    }
+#elif defined Q_OS_LINUX
+    QFileInfo desktopFile(QDir::homePath() +
+                          "/.config/autostart/abc-uploader.desktop");
+    if (autoStart) {
+        if (desktopFile.exists()) return;
+
+        QFile file(desktopFile.absoluteFilePath());
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            qWarning() << "Could not create autostart file";
+            return;
+        }
+
+        QTextStream out(&file);
+        out << "[Desktop Entry]\n";
+        out << "Name=Astrobin Uploader\n";
+        out << "Type=Application\n";
+        out << "Exec=" << QCoreApplication::applicationFilePath() << "\n";
+    } else {
+        QFile::remove(desktopFile.absoluteFilePath());
     }
 #else
     Q_UNUSED(autoStart);
