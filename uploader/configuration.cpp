@@ -16,6 +16,7 @@
 
 using namespace ABC;
 
+static const QLatin1String keyAutoStart("AutoStart");
 static const QLatin1String keyLastUploadTime("LastUploadTime");
 static const QLatin1String keyUploadPath("UploadPath");
 static const QLatin1String keyUserName("UserName");
@@ -101,6 +102,19 @@ void Configuration::setLastUploadTime(const QDateTime &time)
 QDateTime Configuration::lastUploadTime() const
 {
     return value(keyLastUploadTime).toDateTime();
+}
+
+void Configuration::setAutoStart(bool autoStart)
+{
+    if (autoStart == this->autoStart()) return;
+
+    setValue(keyAutoStart, autoStart);
+    Q_EMIT autoStartChanged(autoStart);
+}
+
+bool Configuration::autoStart() const
+{
+    return value(keyAutoStart, true).toBool();
 }
 
 QString Configuration::logDbPath() const

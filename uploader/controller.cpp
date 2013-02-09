@@ -38,6 +38,7 @@ private Q_SLOTS:
     void onUploadPathChanged();
     void onDirectoryChanged();
     void onDataChanged(const QModelIndex &first, const QModelIndex &last);
+    void onAutoStartChanged(bool autoStart);
 
 private:
     QDateTime lastUpdateTime;
@@ -62,6 +63,11 @@ ControllerPrivate::ControllerPrivate(Controller *q):
                      this, SLOT(onLoginDataChanged()));
     QObject::connect(configuration, SIGNAL(passwordChanged()),
                      this, SLOT(onLoginDataChanged()));
+    QObject::connect(configuration, SIGNAL(autoStartChanged(bool)),
+                     this, SLOT(onAutoStartChanged(bool)));
+    /* This might be optimized, but we must make sure that the auto-start is
+     * activated the first time that the program is run. */
+    onAutoStartChanged(configuration->autoStart());
 
     QObject::connect(&watcher, SIGNAL(changed()),
                      this, SLOT(onDirectoryChanged()));
@@ -156,6 +162,24 @@ void ControllerPrivate::onDataChanged(const QModelIndex &first,
         DEBUG() << "Upload completed:" << item->fileName();
         fileLog.addFile(item->fileName());
     }
+}
+
+void ControllerPrivate::onAutoStartChanged(bool autoStart)
+{
+#ifdef Q_OS_WIN32
+    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                       QSettings::NativeFormat);
+    if (autoStart) {
+        QString path = QCoreApplication::applicationFilePath();
+        path.replace("/", "\\");
+        settings.setValue("abc-uploader", "\"" + path + "\"");
+    } else {
+        settings.remove("abc-uploader");
+    }
+#else
+    Q_UNUSED(autoStart);
+    qWarning() << "Auto start not implemented for this platform";
+#endif
 }
 
 Controller::Controller(QObject *parent):

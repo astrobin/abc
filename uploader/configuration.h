@@ -37,12 +37,18 @@ public:
     void setLastUploadTime(const QDateTime &time);
     QDateTime lastUploadTime() const;
 
+    bool autoStart() const;
+
     QString logDbPath() const;
+
+public Q_SLOTS:
+    void setAutoStart(bool autoStart);
 
 Q_SIGNALS:
     void userNameChanged();
     void passwordChanged();
     void uploadPathChanged();
+    void autoStartChanged(bool autoStart);
 
 private:
     ConfigurationPrivate *d_ptr;

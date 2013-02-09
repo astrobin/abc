@@ -12,6 +12,7 @@
 #include "configuration.h"
 #include "debug.h"
 
+#include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -57,6 +58,14 @@ ConfigScreen::ConfigScreen(QWidget *parent):
     pathBox->addWidget(wUploadPath);
     pathBox->addWidget(changePath);
     uploadForm->addRow(tr("Upload files from:"), pathBox);
+
+    QCheckBox *wAutoStart = new QCheckBox(tr("Start automatically"));
+    QObject::connect(wAutoStart, SIGNAL(toggled(bool)),
+                     configuration, SLOT(setAutoStart(bool)));
+    wAutoStart->setToolTip(tr("Start the uploader when I log into "
+                              "my computer"));
+    wAutoStart->setChecked(configuration->autoStart());
+    uploadForm->addWidget(wAutoStart);
 
     QGroupBox *uploadGroup = new QGroupBox(tr("Upload configuration"));
     uploadGroup->setLayout(uploadForm);
