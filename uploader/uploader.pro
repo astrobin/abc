@@ -74,3 +74,7 @@ unix {
     target.path = $${INSTALL_PREFIX}/bin
     INSTALLS += target
 }
+
+win32 {
+    RC_FILE = data/application-icons/abc-uploader.rc
+}
