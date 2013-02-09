@@ -20,7 +20,7 @@ INCLUDEPATH += \
     $${LIBABC}/src
 
 QMAKE_LIBDIR += \
-    $${LIBABC}/src
+    $${LIBABC}/src/$${OBJECTS_DIR}
 QMAKE_RPATHDIR = $${QMAKE_LIBDIR}
 
 LIBS += \

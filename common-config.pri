@@ -4,6 +4,9 @@ PROJECT_VERSION = 1.0
 TOP_SRC_DIR = $$PWD
 TOP_BUILD_DIR = $${TOP_SRC_DIR}/$(BUILD_DIR)
 
+Debug: OBJECTS_DIR=debug
+Release: OBJECTS_DIR=release
+
 INSTALL_PREFIX = /usr
 
 isEmpty(PREFIX) {

@@ -17,10 +17,11 @@ To install the dependencies in Ubuntu 12.04:
 
 == BUILDING ==
 
-First, configure the CFITSIO library:
+First, build the CFITSIO library:
 
   cd cfitsio
   ./configure
+  make
 
 then ABC:
 

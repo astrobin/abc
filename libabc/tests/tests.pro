@@ -8,8 +8,11 @@ SRC = ../src
 INCLUDEPATH += \
     $${SRC}
 
+Debug: OBJECTS_DIR=debug
+Release: OBJECTS_DIR=release
+
 QMAKE_LIBDIR += \
-    $${SRC}
+    $${SRC}/$${OBJECTS_DIR}
 QMAKE_RPATHDIR = $${QMAKE_LIBDIR}
 
 LIBS += \

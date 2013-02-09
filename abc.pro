@@ -2,7 +2,6 @@ include(common-config.pri)
 
 TEMPLATE = subdirs
 SUBDIRS = \
-    cfitsio \
     libabc \
     uploader \
     tests
