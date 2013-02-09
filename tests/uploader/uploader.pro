@@ -1,8 +1,15 @@
 TARGET = uploader-test
 
 QT += \
+    network \
     sql \
     testlib
+
+CONFIG += \
+    link_pkgconfig
+
+PKGCONFIG += \
+    QJson
 
 LIBABC = ../../libabc
 SRC = ../../uploader
@@ -16,11 +23,14 @@ INCLUDEPATH += \
 DEPENDPATH += \
     mock
 
+DEFINES += PROJECT_VERSION=\\\"1.0\\\"
+
 SOURCES += \
     $${SRC}/application.cpp \
     $${SRC}/configuration.cpp \
     $${SRC}/file-log.cpp \
     $${SRC}/file-monitor.cpp \
+    $${SRC}/updater.cpp \
     $${SRC}/upload-queue.cpp \
     uploader-test.cpp
 
@@ -29,6 +39,7 @@ HEADERS += \
     $${SRC}/configuration.h \
     $${SRC}/file-log.h \
     $${SRC}/file-monitor.h \
+    $${SRC}/updater.h \
     $${SRC}/upload-queue.h \
     mock/site.h \
     mock/upload-item.h \
