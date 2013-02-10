@@ -276,7 +276,6 @@ void Site::setLoginData(const QString &userName, const QString &password)
 void Site::setAccessToken(const QByteArray &token)
 {
     Q_D(Site);
-    if (token == d->accessToken) return;
     d->accessToken = token;
     Q_EMIT authenticationFinished();
 }
