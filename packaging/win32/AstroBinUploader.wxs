@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+  <Product Name='AstroBin Uploader 1.0' Id='1B193BBD-3588-44CF-B63B-A8F5039D4443' UpgradeCode='E91E15BE-E417-427A-99A8-F5E56A8D0541'
+    Language='1033' Codepage='1252' Version='1.0.0' Manufacturer='mardy.it'>
+
+    <Package Id='*' Keywords='Installer' Description="AstroBin Uploader installer"
+      Comments='AstroBin Uploader is free to use for all astrobin.com users' Manufacturer='mardy.it'
+      InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+
+    <Media Id='1' Cabinet='Sample.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
+    <Property Id='DiskPrompt' Value="AstroBin Uploader Installation [1]" />
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder'>
+        <Directory Id='astrobincom' Name='astrobin.com'>
+          <Directory Id='INSTALLDIR' Name='AstroBin Uploader'>
+
+            <Component Id='MainExecutable' Guid='53DD756A-1CB8-4152-8836-BDD315B23BAB'>
+              <File Id='abcuploader.exe' Name='abc-uploader.exe' DiskId='1' Source='!(bindpath.abuPath)abc-uploader.exe' KeyPath='yes'>
+                <Shortcut Id="startmenuFoobar10" Directory="ProgramMenuDir" Name="AstroBin Uploader" WorkingDirectory='INSTALLDIR' Icon="abcuploader.exe" IconIndex="0" Advertise="yes" />
+                <Shortcut Id="desktopFoobar10" Directory="DesktopFolder" Name="AstroBin Uploader" WorkingDirectory='INSTALLDIR' Icon="abcuploader.exe" IconIndex="0" Advertise="yes" />
+              </File>
+            </Component>
+
+            <Component Id='QtLibrary' Guid='4BA645C0-3D0D-48B9-AA9B-D32ED17380D7'>
+              <File Id='mingwm10' Name='mingwm10.dll' DiskId='1' Source='!(bindpath.mingwBin)mingwm10.dll' />
+              <File Id='libgcc' Name='libgcc_s_dw2-1.dll' DiskId='1' Source='!(bindpath.mingwBin)libgcc_s_dw2-1.dll' />
+              <File Id='libstdc' Name='libstdc++-6.dll' DiskId='1' Source='!(bindpath.mingwBin)libstdc++-6.dll' />
+              <File Id='libiconv' Name='libiconv-2.dll' DiskId='1' Source='!(bindpath.mingwBin)libiconv-2.dll' />
+              <File Id='libintl' Name='libintl-8.dll' DiskId='1' Source='!(bindpath.mingwBin)libintl-8.dll' />
+
+              <File Id='qtCore' Name='QtCore4.dll' DiskId='1' Source='!(bindpath.qtBin)QtCore4.dll' KeyPath='yes' />
+              <File Id='qtGui' Name='QtGui4.dll' DiskId='1' Source='!(bindpath.qtBin)QtGui4.dll' />
+              <File Id='qtNetwork' Name='QtNetwork4.dll' DiskId='1' Source='!(bindpath.qtBin)QtNetwork4.dll' />
+              <File Id='qtDeclarative' Name='QtDeclarative4.dll' DiskId='1' Source='!(bindpath.qtBin)QtDeclarative4.dll' />
+              <File Id='qtScript' Name='QtScript4.dll' DiskId='1' Source='!(bindpath.qtBin)QtScript4.dll' />
+              <File Id='qtSql' Name='QtSql4.dll' DiskId='1' Source='!(bindpath.qtBin)QtSql4.dll' />
+              <File Id='qtSvg' Name='QtSvg4.dll' DiskId='1' Source='!(bindpath.qtBin)QtSvg4.dll' />
+              <File Id='qtXml' Name='QtXml4.dll' DiskId='1' Source='!(bindpath.qtBin)QtXml4.dll' />
+              <File Id='qtXmlPatterns' Name='QtXmlPatterns4.dll' DiskId='1' Source='!(bindpath.qtBin)QtXmlPatterns4.dll' />
+            </Component>
+
+            <Directory Id='imageformats' Name='imageformats'>
+              <Component Id='ImageFormats' Guid='555B361E-59FA-4728-884D-A2D56EB7B64A'>
+                <File Id='qsvg' Name='qsvg4.dll' DiskId='1' Source='!(bindpath.qtBase)plugins/imageformats/qsvg4.dll' />
+                <File Id='qtga' Name='qtga4.dll' DiskId='1' Source='!(bindpath.qtBase)plugins/imageformats/qtga4.dll' />
+                <File Id='qgif' Name='qgif4.dll' DiskId='1' Source='!(bindpath.qtBase)plugins/imageformats/qgif4.dll' />
+                <File Id='qico' Name='qico4.dll' DiskId='1' Source='!(bindpath.qtBase)plugins/imageformats/qico4.dll' />
+                <File Id='qjpeg' Name='qjpeg4.dll' DiskId='1' Source='!(bindpath.qtBase)plugins/imageformats/qjpeg4.dll' />
+                <File Id='qmng' Name='qmng4.dll' DiskId='1' Source='!(bindpath.qtBase)plugins/imageformats/qmng4.dll' />
+                <File Id='qtiff' Name='qtiff4.dll' DiskId='1' Source='!(bindpath.qtBase)plugins/imageformats/qtiff4.dll' />
+              </Component>
+            </Directory>
+
+            <Component Id='HelperLibrary' Guid='597FE6B5-5BB1-40AA-A18E-42B6965DCAA4'>
+              <File Id='libabc' Name='abc.dll' DiskId='1' Source='!(bindpath.libabcBin)abc.dll' KeyPath='yes' />
+              <File Id='libraw' Name='raw.dll' DiskId='1' Source='!(bindpath.mingwLocalBin)raw.dll' />
+              <File Id='zlib' Name='zlib1.dll' DiskId='1' Source='!(bindpath.mingwLocalBin)zlib1.dll' />
+              <File Id='qjson' Name='libqjson.dll' DiskId='1' Source='!(bindpath.mingwLocalBin)libqjson.dll' />
+            </Component>
+
+          </Directory>
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="AstroBin Uploader">
+          <Component Id="ProgramMenuDir" Guid="508D4B85-750A-4643-B748-8C2F6E712AF8">
+            <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
+            <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Type='string' Value='' KeyPath='yes' />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <Feature Id='Complete' Level='1'>
+      <ComponentRef Id='MainExecutable' />
+      <ComponentRef Id='QtLibrary' />
+      <ComponentRef Id='HelperLibrary' />
+      <ComponentRef Id='ImageFormats' />
+      <ComponentRef Id='ProgramMenuDir' />
+    </Feature>
+
+    <Icon Id="abcuploader.exe" SourceFile='!(bindpath.abuPath)abc-uploader.exe' />
+
+  </Product>
+</Wix>
