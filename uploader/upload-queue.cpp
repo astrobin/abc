@@ -253,6 +253,12 @@ void UploadQueue::requestUpload(const QString &filePath,
     d->authenticate();
 }
 
+UploadQueue::Status UploadQueue::status() const
+{
+    Q_D(const UploadQueue);
+    return d->status;
+}
+
 void UploadQueue::itemsStatus(int *succeeded, int *inProgress,
                               int *failed, int *retryLater) const
 {
