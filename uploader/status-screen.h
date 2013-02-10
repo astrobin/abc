@@ -36,6 +36,7 @@ private Q_SLOTS:
 
 private:
     QLabel *progressLabel;
+    QLabel *errorLabel;
     QLabel *updateLabel;
 };
 
