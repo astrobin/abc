@@ -152,8 +152,13 @@ QByteArray SitePrivate::accessTokenFromReply(QNetworkReply *reply)
         reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
     if (statusCode != 200) {
         DEBUG() << "Status code:" << statusCode;
-        setError(Site::NetworkError,
-                 QString("Got HTTP code %1").arg(statusCode));
+        if (statusCode >= 400 && statusCode < 500) {
+            setError(Site::AuthenticationError,
+                     QString("Got HTTP code %1").arg(statusCode));
+        } else {
+            setError(Site::NetworkError,
+                     QString("Got HTTP code %1").arg(statusCode));
+        }
         return QByteArray();
     }
 
