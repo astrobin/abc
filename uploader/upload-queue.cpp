@@ -132,7 +132,10 @@ void UploadQueuePrivate::runQueue()
              rescheduled < numItems &&
              !queue.isEmpty());
 
-    setStatus(UploadQueue::Idle);
+    if (activeUploads.isEmpty()) {
+        setStatus(UploadQueue::Idle);
+    }
+
     /* If all items were rescheduled, it means that no files can be
      * safely uploaded at the moment; in that case, let's try again after
      * some time. */
