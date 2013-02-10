@@ -45,6 +45,10 @@ public Q_SLOTS:
     void onProgressChanged(int progress);
 
 private:
+    void setStatus(UploadQueue::Status status);
+
+private:
+    UploadQueue::Status status;
     /* "items" and "fileMap" must always be kept in sync */
     QList<UploadItem *> items;
     QHash<QString, UploadItem *> fileMap;
@@ -61,6 +65,7 @@ private:
 
 UploadQueuePrivate::UploadQueuePrivate(UploadQueue *q):
     QObject(q),
+    status(UploadQueue::Idle),
     site(new Site(this)),
     q_ptr(q)
 {
@@ -93,7 +98,7 @@ void UploadQueuePrivate::onAuthenticationFinished()
 {
     if (Q_UNLIKELY(!site->isAuthenticated())) {
         qWarning() << "Authentication failed";
-        // TODO: expose the error to the UI
+        setStatus(UploadQueue::Warning);
         return;
     }
 
@@ -103,8 +108,6 @@ void UploadQueuePrivate::onAuthenticationFinished()
 
 void UploadQueuePrivate::runQueue()
 {
-    Q_Q(UploadQueue);
-
     if (queue.isEmpty() || activeUploads.count() >= MAX_UPLOADS) return;
 
     QDateTime safeUploadTime =
@@ -112,7 +115,7 @@ void UploadQueuePrivate::runQueue()
     int rescheduled = 0;
     int numItems = queue.count();
     do {
-        Q_EMIT q->statusChanged(UploadQueue::Uploading);
+        setStatus(UploadQueue::Uploading);
         UploadItem *item = queue.dequeue();
         /* Check that the file hasn't been modified in the last few seconds
          * (because otherwise it might not be complete) */
@@ -129,7 +132,7 @@ void UploadQueuePrivate::runQueue()
              rescheduled < numItems &&
              !queue.isEmpty());
 
-    Q_EMIT q->statusChanged(UploadQueue::Idle);
+    setStatus(UploadQueue::Idle);
     /* If all items were rescheduled, it means that no files can be
      * safely uploaded at the moment; in that case, let's try again after
      * some time. */
@@ -174,7 +177,7 @@ void UploadQueuePrivate::onProgressChanged(int progress)
     activeUploads.remove(item);
 
     if (item->progress() < 0) {
-        Q_EMIT q->statusChanged(UploadQueue::Warning);
+        setStatus(UploadQueue::Warning);
         if (item->errorIsRecoverable()) {
             retryItems.insert(item);
             if (!retryTimer.isActive())
@@ -191,6 +194,16 @@ void UploadQueuePrivate::onProgressChanged(int progress)
     Q_EMIT q->dataChanged(modelIndex, modelIndex);
 
     runQueue();
+}
+
+void UploadQueuePrivate::setStatus(UploadQueue::Status status)
+{
+    Q_Q(UploadQueue);
+
+    if (status == this->status) return;
+
+    this->status = status;
+    Q_EMIT q->statusChanged(status);
 }
 
 UploadQueue::UploadQueue(QObject *parent):

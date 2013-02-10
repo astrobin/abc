@@ -40,6 +40,7 @@ public:
 
     void requestUpload(const QString &filePath, const QString &fileName);
 
+    Status status() const;
     void itemsStatus(int *succeeded, int *inProgress = 0,
                      int *failed = 0, int *retryLater = 0) const;
 
@@ -48,7 +49,7 @@ public:
                   int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-signals:
+Q_SIGNALS:
     void statusChanged(UploadQueue::Status status);
 
 private:
