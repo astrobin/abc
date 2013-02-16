@@ -4,5 +4,6 @@
   <file alias="warning-systray">warning-32x32.png</file>
   <file alias="uploading-systray">uploading-32x32.png</file>
   <file alias="window-icon">application-icons/abc-uploader.svg</file>
+  <file alias="logo">default-128x128.png</file>
 </qresource>
 </RCC>
