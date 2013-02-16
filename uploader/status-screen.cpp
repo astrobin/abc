@@ -15,6 +15,7 @@
 
 #include <ABC/Site>
 #include <QLabel>
+#include <QProgressBar>
 #include <QPushButton>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -42,6 +43,10 @@ StatusScreen::StatusScreen(QWidget *parent):
     QDialog(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout;
+
+    progressBar = new QProgressBar;
+    progressBar->setVisible(false);
+    layout->addWidget(progressBar);
 
     progressLabel = new QLabel;
     layout->addWidget(progressLabel);
@@ -114,10 +119,15 @@ void StatusScreen::updateProgress()
 
     if (completed >= total) {
         progressLabel->setText(tr("Up to date"));
+        progressBar->hide();
         errorLabel->hide();
     } else {
         progressLabel->setText(tr("Uploaded %1 out of %2 files").
                                arg(completed).arg(total));
+        progressBar->setMaximum(total);
+        progressBar->setMinimum(0);
+        progressBar->setValue(completed);
+        progressBar->show();
 
         /* For the time being, we don't distinguish between persistent failures
          * and retriable ones. */

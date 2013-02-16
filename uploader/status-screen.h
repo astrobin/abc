@@ -13,6 +13,7 @@
 #include <QDialog>
 
 class QLabel;
+class QProgressBar;
 class QUrl;
 
 namespace ABC {
@@ -35,6 +36,7 @@ private Q_SLOTS:
     void onConfigButtonClicked();
 
 private:
+    QProgressBar *progressBar;
     QLabel *progressLabel;
     QLabel *errorLabel;
     QLabel *updateLabel;
