@@ -10,4 +10,8 @@
 <qresource>
   <file alias="uploading-systray">uploading-32x32.png</file>
 </qresource>
+
+<qresource>
+  <file alias="window-icon">application-icons/abc-uploader.svg</file>
+</qresource>
 </RCC>

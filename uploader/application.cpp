@@ -13,6 +13,7 @@
 #include "updater.h"
 #include "upload-queue.h"
 
+#include <QIcon>
 #include <QNetworkAccessManager>
 
 using namespace ABC;
@@ -50,6 +51,7 @@ Application::Application(int &argc, char **argv):
     setQuitOnLastWindowClosed(false);
     setOrganizationName("astrobin.com");
     setApplicationName("Astrobin Uploader");
+    setWindowIcon(QIcon(":window-icon"));
 }
 
 Application::~Application()
