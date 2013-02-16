@@ -1,17 +1,8 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
   <file alias="default-systray">default-32x32.png</file>
-</qresource>
-
-<qresource>
   <file alias="warning-systray">warning-32x32.png</file>
-</qresource>
-
-<qresource>
   <file alias="uploading-systray">uploading-32x32.png</file>
-</qresource>
-
-<qresource>
   <file alias="window-icon">application-icons/abc-uploader.svg</file>
 </qresource>
 </RCC>
