@@ -14,6 +14,7 @@
 #include "upload-queue.h"
 
 #include <ABC/Site>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QProgressBar>
 #include <QPushButton>
@@ -55,17 +56,30 @@ StatusScreen::StatusScreen(QWidget *parent):
     errorLabel->setVisible(false);
     errorLabel->setStyleSheet("QLabel { color : red; }");
     layout->addWidget(errorLabel);
+    layout->addStretch();
 
     updateLabel = new QLabel;
     updateLabel->setTextFormat(Qt::RichText);
     updateLabel->setOpenExternalLinks(true);
     updateLabel->setVisible(false);
     layout->addWidget(updateLabel);
+    layout->addStretch();
+
+    QHBoxLayout *buttonBox = new QHBoxLayout;
+    buttonBox->addStretch();
 
     QPushButton *configButton = new QPushButton(tr("Configure..."));
     QObject::connect(configButton, SIGNAL(clicked()),
                      this, SLOT(onConfigButtonClicked()));
-    layout->addWidget(configButton);
+    buttonBox->addWidget(configButton);
+
+    QPushButton *hideButton = new QPushButton(tr("Hide"));
+    QObject::connect(hideButton, SIGNAL(clicked()),
+                     this, SLOT(reject()));
+    buttonBox->addWidget(hideButton);
+    buttonBox->addStretch();
+
+    layout->addLayout(buttonBox);
 
     setLayout(layout);
 
