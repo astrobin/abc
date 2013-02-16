@@ -52,10 +52,6 @@ StatusScreen::StatusScreen(QWidget *parent):
     progressLabel = new QLabel;
     layout->addWidget(progressLabel);
 
-    errorLabel = new QLabel;
-    errorLabel->setVisible(false);
-    errorLabel->setStyleSheet("QLabel { color : red; }");
-    layout->addWidget(errorLabel);
     layout->addStretch();
 
     updateLabel = new QLabel;
@@ -80,6 +76,12 @@ StatusScreen::StatusScreen(QWidget *parent):
     buttonBox->addStretch();
 
     layout->addLayout(buttonBox);
+
+    layout->addStretch();
+    errorLabel = new QLabel;
+    errorLabel->setVisible(false);
+    errorLabel->setStyleSheet("QLabel { color : red; }");
+    layout->addWidget(errorLabel);
 
     setLayout(layout);
 
