@@ -43,6 +43,8 @@ static QString errorMessageFromCode(Site::ErrorCode code)
 StatusScreen::StatusScreen(QWidget *parent):
     QDialog(parent)
 {
+    setWindowTitle(tr("Astrobin Uploader"));
+
     QVBoxLayout *layout = new QVBoxLayout;
 
     progressBar = new QProgressBar;

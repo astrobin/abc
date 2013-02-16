@@ -26,6 +26,8 @@ using namespace ABC;
 ConfigScreen::ConfigScreen(QWidget *parent):
     QDialog(parent)
 {
+    setWindowTitle(tr("Astrobin Uploader - Configuration"));
+
     Configuration *configuration =
         Application::instance()->configuration();
 
