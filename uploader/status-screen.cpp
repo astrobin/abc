@@ -79,6 +79,7 @@ StatusScreen::StatusScreen(QWidget *parent):
 
     layout->addStretch();
     errorLabel = new QLabel;
+    errorLabel->setAlignment(Qt::AlignHCenter);
     errorLabel->setVisible(false);
     errorLabel->setStyleSheet("QLabel { color : red; }");
     layout->addWidget(errorLabel);
