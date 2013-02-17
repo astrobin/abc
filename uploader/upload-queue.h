@@ -10,11 +10,10 @@
 #ifndef ABC_UPLOAD_QUEUE_H
 #define ABC_UPLOAD_QUEUE_H
 
+#include <ABC/Site>
 #include <QAbstractListModel>
 
 namespace ABC {
-
-class Site;
 
 class UploadQueuePrivate;
 class UploadQueue: public QAbstractListModel
@@ -41,6 +40,7 @@ public:
     void requestUpload(const QString &filePath, const QString &fileName);
 
     Status status() const;
+    Site::ErrorCode lastUploadError() const;
     void itemsStatus(int *succeeded, int *inProgress = 0,
                      int *failed = 0, int *retryLater = 0) const;
 

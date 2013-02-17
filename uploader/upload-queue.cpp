@@ -58,6 +58,7 @@ private:
     QTimer runTimer;
     QTimer retryTimer;
     Site *site;
+    Site::ErrorCode lastUploadError;
     mutable UploadQueue *q_ptr;
 };
 
@@ -67,6 +68,7 @@ UploadQueuePrivate::UploadQueuePrivate(UploadQueue *q):
     QObject(q),
     status(UploadQueue::Idle),
     site(new Site(this)),
+    lastUploadError(Site::NoError),
     q_ptr(q)
 {
     runTimer.setSingleShot(true);
@@ -180,6 +182,7 @@ void UploadQueuePrivate::onProgressChanged(int progress)
     activeUploads.remove(item);
 
     if (item->progress() < 0) {
+        lastUploadError = item->lastError();
         setStatus(UploadQueue::Warning);
         if (item->errorIsRecoverable()) {
             retryItems.insert(item);
@@ -257,6 +260,12 @@ UploadQueue::Status UploadQueue::status() const
 {
     Q_D(const UploadQueue);
     return d->status;
+}
+
+Site::ErrorCode UploadQueue::lastUploadError() const
+{
+    Q_D(const UploadQueue);
+    return d->lastUploadError;
 }
 
 void UploadQueue::itemsStatus(int *succeeded, int *inProgress,
