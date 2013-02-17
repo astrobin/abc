@@ -83,7 +83,6 @@ UploadQueuePrivate::UploadQueuePrivate(UploadQueue *q):
 
     QObject::connect(site, SIGNAL(authenticationFinished()),
                      this, SLOT(onAuthenticationFinished()));
-    authenticate();
 }
 
 void UploadQueuePrivate::authenticate()
