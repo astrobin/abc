@@ -52,7 +52,6 @@ class SitePrivate: public QObject
 
     inline void ensureHasNetworkAccessManager();
     void authenticate();
-    QVariantMap parseJson(const QByteArray &data);
     void setError(Site::ErrorCode code,
                   const QString &message = QString());
     bool handleNetworkError(QNetworkReply *reply);
@@ -124,17 +123,6 @@ void SitePrivate::authenticate()
             this, SLOT(onSslErrors(QList<QSslError>)));
 }
 
-QVariantMap SitePrivate::parseJson(const QByteArray &data)
-{
-    bool ok = false;
-    QJson::Parser parser;
-    QVariant tree = parser.parse(data, &ok);
-    if (ok) {
-        return tree.toMap();
-    }
-    return QVariantMap();
-}
-
 void SitePrivate::setError(Site::ErrorCode code, const QString &message)
 {
     Q_Q(Site);
@@ -162,7 +150,7 @@ QByteArray SitePrivate::accessTokenFromReply(QNetworkReply *reply)
         return QByteArray();
     }
 
-    QVariantMap response = parseJson(replyContent);
+    QVariantMap response = Site::parseJson(replyContent);
     if (response.contains("token")) {
         return response["token"].toByteArray();
     }
@@ -314,6 +302,17 @@ QString Site::lastErrorMessage() const
 {
     Q_D(const Site);
     return d->lastErrorMessage;
+}
+
+QVariantMap Site::parseJson(const QByteArray &data)
+{
+    bool ok = false;
+    QJson::Parser parser;
+    QVariant tree = parser.parse(data, &ok);
+    if (ok) {
+        return tree.toMap();
+    }
+    return QVariantMap();
 }
 
 #include "site.moc"

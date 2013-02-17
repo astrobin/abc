@@ -21,9 +21,11 @@
 #ifndef ABC_SITE_H
 #define ABC_SITE_H
 
+#include <QByteArray>
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QVariantMap>
 
 class QHttpPart;
 class QNetworkAccessManager;
@@ -62,6 +64,8 @@ public:
 
     QNetworkReply *uploadFile(const QString &filePath,
                               const QList<QHttpPart> &extraParts);
+
+    static QVariantMap parseJson(const QByteArray &data);
 
 public Q_SLOTS:
     void authenticate();
