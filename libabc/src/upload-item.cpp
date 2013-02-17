@@ -112,17 +112,41 @@ void UploadItemPrivate::startUpload(Site *site)
 
 bool UploadItemPrivate::checkReply(QNetworkReply *reply)
 {
-    if (reply->error() != QNetworkReply::NoError) {
-        qWarning() << "Network error while uploading " << fileName <<
-            ":" << reply->errorString() << " / " << reply->readAll().data();
-        // TODO: better error handling
-        lastError = Site::NetworkError;
-        lastErrorMessage = reply->errorString();
+    QByteArray replyContent = reply->readAll();
+
+    uint statusCode =
+        reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
+    if (statusCode != 200) {
+        QVariantMap response = Site::parseJson(replyContent);
+        if (response.contains("detail")) {
+            lastErrorMessage = response["detail"].toString();
+        }
+
+        DEBUG() << statusCode << lastErrorMessage;
+        switch (statusCode) {
+        case 400:
+            // assume it's insufficient disk space
+            lastError = Site::QuotaExceededError;
+            break;
+        case 415:
+            lastError = Site::WrongFileType;
+            break;
+        default:
+            lastError = Site::NetworkError;
+            break;
+        }
         return false;
     }
 
-    // TODO: check the reply contents to see if the upload was accepted
-    DEBUG() << "Upload reply:" << reply->readAll();
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Network error while uploading " << fileName <<
+            ":" << reply->errorString() << " / " << replyContent;
+        // TODO: better error handling
+        lastError = Site::NetworkError;
+        return false;
+    }
+
+    DEBUG() << "Upload reply:" << replyContent;
     return true;
 }
 

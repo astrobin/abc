@@ -34,6 +34,10 @@ static QString errorMessageFromCode(Site::ErrorCode code)
         return QObject::tr("SSL error");
     case Site::AuthenticationError:
         return QObject::tr("Authentication error");
+    case Site::WrongFileType:
+        return QObject::tr("Unsupported file type");
+    case Site::QuotaExceededError:
+        return QObject::tr("Not enough storage space in the user's account");
     case Site::UnknownError:
     default:
         return QObject::tr("Unknown error");

@@ -46,6 +46,7 @@ public:
         SslError,
         AuthenticationError,
         QuotaExceededError,
+        WrongFileType,
     };
 
     Site(QObject *parent = 0);
