@@ -69,7 +69,7 @@ UploadItemPrivate::UploadItemPrivate(const QString &filePath,
     filePath(filePath),
     fileName(fileName),
     progress(0),
-    lastError(Site::UnknownError),
+    lastError(Site::NoError),
     q_ptr(q)
 {
 }

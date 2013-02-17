@@ -84,6 +84,7 @@ SitePrivate::SitePrivate(Site *q):
     QObject(q),
     isAuthenticating(false),
     nam(0),
+    lastError(Site::NoError),
     q_ptr(q)
 {
 }

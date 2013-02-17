@@ -40,7 +40,8 @@ class Site: public QObject
 
 public:
     enum ErrorCode {
-        UnknownError = 0,
+        NoError = 0,
+        UnknownError,
         NetworkError,
         SslError,
         AuthenticationError,
