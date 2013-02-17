@@ -116,7 +116,7 @@ bool UploadItemPrivate::checkReply(QNetworkReply *reply)
 
     uint statusCode =
         reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
-    if (statusCode != 200) {
+    if (statusCode < 200 || statusCode >= 400) {
         QVariantMap response = Site::parseJson(replyContent);
         if (response.contains("detail")) {
             lastErrorMessage = response["detail"].toString();
