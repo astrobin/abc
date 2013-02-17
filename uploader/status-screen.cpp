@@ -152,8 +152,11 @@ void StatusScreen::updateProgress()
          * and retriable ones. */
         int errors = failed + retryLater;
         if (uploadQueue->status() == UploadQueue::Warning || errors > 0) {
-            QString errorMessage =
-                errorMessageFromCode(uploadQueue->site()->lastError());
+            Site::ErrorCode errorCode = uploadQueue->lastUploadError();
+            if (errorCode == Site::NoError) {
+                errorCode = uploadQueue->site()->lastError();
+            }
+            QString errorMessage = errorMessageFromCode(errorCode);
 
             if (errors > 0) {
                 errorLabel->setText(tr("%1 files failed to upload (%2).\n"
