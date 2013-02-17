@@ -21,14 +21,14 @@
 #ifndef ABC_UPLOAD_ITEM_H
 #define ABC_UPLOAD_ITEM_H
 
+#include "site.h"
+
 #include <QByteArray>
 #include <QMetaType>
 #include <QObject>
 #include <QString>
 
 namespace ABC {
-
-class Site;
 
 class UploadItemPrivate;
 class UploadItem: public QObject
@@ -48,6 +48,7 @@ public:
     QByteArray fileHash() const;
     int progress() const;
 
+    Site::ErrorCode lastError() const;
     QString lastErrorMessage() const;
     bool errorIsRecoverable() const;
 

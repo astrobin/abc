@@ -194,6 +194,12 @@ int UploadItem::progress() const
     return d->progress;
 }
 
+Site::ErrorCode UploadItem::lastError() const
+{
+    Q_D(const UploadItem);
+    return d->lastError;
+}
+
 QString UploadItem::lastErrorMessage() const
 {
     Q_D(const UploadItem);

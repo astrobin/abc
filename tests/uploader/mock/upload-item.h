@@ -10,6 +10,8 @@
 #ifndef ABC_UPLOAD_ITEM_H
 #define ABC_UPLOAD_ITEM_H
 
+#include "site.h"
+
 #include <QByteArray>
 #include <QList>
 #include <QMetaType>
@@ -18,8 +20,6 @@
 #include <QTimer>
 
 namespace ABC {
-
-class Site;
 
 class UploadItem: public QObject
 {
@@ -49,6 +49,7 @@ public:
     QByteArray fileHash() const { return QByteArray(); }
     int progress() const { return m_progress; }
 
+    Site::ErrorCode lastError() const { return m_errorCode; }
     QString lastErrorMessage() const { return m_errorMessage; }
     bool errorIsRecoverable() const { return m_errorIsRecoverable; }
 
@@ -57,11 +58,13 @@ public:
                    const QString &message = QString("Error")) {
         m_replyTimer.setInterval(msec);
         m_errorIsRecoverable = recoverable;
+        m_errorCode = Site::NetworkError;
         m_errorMessage = message;
     }
 
     void succeedAfter(int msec) {
         m_replyTimer.setInterval(msec);
+        m_errorCode = Site::NoError;
         m_errorMessage.clear();
     }
 
@@ -87,6 +90,7 @@ Q_SIGNALS:
 private:
     QString m_filePath;
     QString m_fileName;
+    Site::ErrorCode m_errorCode;
     QString m_errorMessage;
     bool m_errorIsRecoverable;
     int m_progress;
