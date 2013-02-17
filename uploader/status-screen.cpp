@@ -37,7 +37,7 @@ static QString errorMessageFromCode(Site::ErrorCode code)
     case Site::WrongFileType:
         return QObject::tr("Unsupported file type");
     case Site::QuotaExceededError:
-        return QObject::tr("Not enough storage space in the user's account");
+        return QObject::tr("Not enough storage space in your account");
     case Site::UnknownError:
     default:
         return QObject::tr("Unknown error");
