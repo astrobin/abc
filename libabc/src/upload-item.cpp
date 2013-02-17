@@ -124,8 +124,7 @@ bool UploadItemPrivate::checkReply(QNetworkReply *reply)
 
         DEBUG() << statusCode << lastErrorMessage;
         switch (statusCode) {
-        case 400:
-            // assume it's insufficient disk space
+        case 403:
             lastError = Site::QuotaExceededError;
             break;
         case 415:
