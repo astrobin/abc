@@ -234,6 +234,7 @@ bool UploadItem::errorIsRecoverable() const
     Q_D(const UploadItem);
     switch (d->lastError) {
     case Site::NetworkError:
+    case Site::QuotaExceededError:
         return true;
     default:
         break;
