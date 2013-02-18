@@ -160,7 +160,7 @@ void ControllerPrivate::onDataChanged(const QModelIndex &first,
     UploadQueue *uploadQueue = Application::instance()->uploadQueue();
 
     for (QModelIndex i = first;
-         i < last;
+         i <= last;
          i = i.sibling(i.row() + 1, i.column())) {
         QVariant data = uploadQueue->data(i, UploadQueue::UploadItemRole);
         UploadItem *item = data.value<UploadItem *>();
