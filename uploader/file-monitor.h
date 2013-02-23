@@ -11,6 +11,7 @@
 #define ABC_FILE_MONITOR_H
 
 #include <QObject>
+#include <QSet>
 #include <QStringList>
 
 class QDateTime;
@@ -28,6 +29,8 @@ public:
 
     void setBasePath(const QString &path);
     QString basePath() const;
+
+    void setAcceptedExtensions(const QSet<QString> &extensions);
 
     QStringList filesChangedSince(const QDateTime &since) const;
 

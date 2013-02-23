@@ -25,6 +25,27 @@
 
 using namespace ABC;
 
+static const char *acceptedExtensions[] = {
+    "fit", "fits",
+    "3fr",
+    "ari", "arw",
+    "bay",
+    "crw", "cr2", "cap",
+    "dcs", "dcr", "dng", "drf",
+    "eip", "erf",
+    "fff",
+    "iiq",
+    "k25", "kdc",
+    "mef", "mos", "mrw",
+    "nef", "nrw",
+    "obm", "orf",
+    "pef", "ptx", "pxn",
+    "r3d", "raf", "raw", "rwl", "rw2", "rwz",
+    "sr2", "srf", "srw",
+    "x3f",
+};
+#define ACCEPTED_EXTENSIONS_COUNT (sizeof(acceptedExtensions) / sizeof(char *))
+
 namespace ABC {
 
 class ControllerPrivate: public QObject
@@ -57,6 +78,12 @@ ControllerPrivate::ControllerPrivate(Controller *q):
     loginScheduled(false),
     q_ptr(q)
 {
+    QSet<QString> extensions;
+    for (size_t i = 0; i < ACCEPTED_EXTENSIONS_COUNT; i++) {
+        extensions.insert(QString::fromLatin1(acceptedExtensions[i]));
+    }
+    watcher.setAcceptedExtensions(extensions);
+
     Configuration *configuration =
        Application::instance()->configuration();
     QObject::connect(configuration, SIGNAL(uploadPathChanged()),

@@ -45,6 +45,7 @@ private:
     QDateTime lastSignalTime;
     QTimer signalTimer;
     QString basePath;
+    QSet<QString> acceptedExtensions;
     mutable FileMonitor *q_ptr;
 };
 
@@ -133,7 +134,9 @@ FileMonitorPrivate::filesChangedSince(const QDateTime &since,
     foreach (const QFileInfo &info, allFiles) {
         if (info.isDir()) {
             list += filesChangedSince(since, info.absoluteFilePath());
-        } else if (info.lastModified() > since) {
+        } else if ((acceptedExtensions.isEmpty() ||
+                    acceptedExtensions.contains(info.suffix().toLower())) &&
+                   info.lastModified() > since) {
             list.append(info.absoluteFilePath());
         }
     }
@@ -162,6 +165,12 @@ QString FileMonitor::basePath() const
 {
     Q_D(const FileMonitor);
     return d->basePath;
+}
+
+void FileMonitor::setAcceptedExtensions(const QSet<QString> &extensions)
+{
+    Q_D(FileMonitor);
+    d->acceptedExtensions = extensions;
 }
 
 QStringList FileMonitor::filesChangedSince(const QDateTime &since) const
