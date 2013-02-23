@@ -147,7 +147,7 @@ void StatusScreen::updateProgress()
     } else {
         progressLabel->setText(tr("Uploaded %1 out of %2 files").
                                arg(completed).arg(total));
-        progressBar->setMaximum(total);
+        progressBar->setMaximum(total - failed);
         progressBar->setMinimum(0);
         progressBar->setValue(completed);
         progressBar->show();
