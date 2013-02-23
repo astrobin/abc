@@ -1,6 +1,7 @@
 TARGET = abc-test
 
 QT += \
+    network \
     testlib
 
 SRC = ../src
