@@ -39,6 +39,7 @@ class UploadQueuePrivate: public QObject
 
 public Q_SLOTS:
     void authenticate();
+    void onAuthenticationStarted();
     void onAuthenticationFinished();
     void runQueue();
     void retryFailed();
@@ -81,6 +82,8 @@ UploadQueuePrivate::UploadQueuePrivate(UploadQueue *q):
     QObject::connect(&retryTimer, SIGNAL(timeout()),
                      this, SLOT(retryFailed()));
 
+    QObject::connect(site, SIGNAL(authenticationStarted()),
+                     this, SLOT(onAuthenticationStarted()));
     QObject::connect(site, SIGNAL(authenticationFinished()),
                      this, SLOT(onAuthenticationFinished()));
 }
@@ -93,6 +96,11 @@ void UploadQueuePrivate::authenticate()
     }
 
     site->authenticate();
+}
+
+void UploadQueuePrivate::onAuthenticationStarted()
+{
+    setStatus(UploadQueue::Idle);
 }
 
 void UploadQueuePrivate::onAuthenticationFinished()

@@ -73,6 +73,7 @@ public Q_SLOTS:
     void authenticate();
 
 Q_SIGNALS:
+    void authenticationStarted();
     void authenticationFinished();
     void error(Site::ErrorCode);
 

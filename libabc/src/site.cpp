@@ -98,8 +98,12 @@ void SitePrivate::ensureHasNetworkAccessManager()
 
 void SitePrivate::authenticate()
 {
+    Q_Q(Site);
+
     if (isAuthenticating) return;
     isAuthenticating = true;
+
+    Q_EMIT q->authenticationStarted();
 
     ensureHasNetworkAccessManager();
 
