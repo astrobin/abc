@@ -163,8 +163,7 @@ void StatusScreen::updateProgress()
             QString errorMessage = errorMessageFromCode(errorCode);
 
             if (errors > 0) {
-                errorLabel->setText(tr("%1 files failed to upload (%2).\n"
-                                       "The upload will be attempted again.").
+                errorLabel->setText(tr("%1 files failed to upload (%2).").
                                     arg(errors).arg(errorMessage));
             } else {
                 /* This is probably an authentication error */
