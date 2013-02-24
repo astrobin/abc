@@ -117,7 +117,11 @@ void UploadQueuePrivate::onAuthenticationFinished()
 
 void UploadQueuePrivate::runQueue()
 {
-    if (queue.isEmpty() || activeUploads.count() >= MAX_UPLOADS) return;
+    if (activeUploads.count() >= MAX_UPLOADS) return;
+    if (queue.isEmpty()) {
+        setStatus(UploadQueue::Idle);
+        return;
+    }
 
     QDateTime safeUploadTime =
         QDateTime::currentDateTimeUtc().addSecs(-SAFE_UPLOAD_DELAY);
