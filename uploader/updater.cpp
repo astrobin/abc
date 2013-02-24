@@ -78,7 +78,9 @@ QString UpdaterPrivate::setupOsName()
         foreach (const QString &line, all.split('\n')) {
             QStringList parts = line.split("=");
             if (parts[0].trimmed() == "DISTRIB_ID") {
-                name = parts[1].trimmed().toLower();
+                QString distro = parts[1].trimmed().toLower();
+                if (distro == "ubuntu")
+                    name = distro;
                 break;
             }
         }
