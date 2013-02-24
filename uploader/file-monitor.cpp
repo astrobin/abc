@@ -134,10 +134,14 @@ FileMonitorPrivate::filesChangedSince(const QDateTime &since,
     foreach (const QFileInfo &info, allFiles) {
         if (info.isDir()) {
             list += filesChangedSince(since, info.absoluteFilePath());
-        } else if ((acceptedExtensions.isEmpty() ||
+        } else {
+            if (info.size() == 0) continue;
+
+            if ((acceptedExtensions.isEmpty() ||
                     acceptedExtensions.contains(info.suffix().toLower())) &&
                    info.lastModified() > since) {
-            list.append(info.absoluteFilePath());
+                list.append(info.absoluteFilePath());
+            }
         }
     }
     return list;
