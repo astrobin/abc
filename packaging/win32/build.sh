@@ -19,8 +19,9 @@ MINGW_LOCAL_BIN="${MINGW_BASE}\msys\1.0\local\bin"
 QT_BIN="${QT_BASE}\bin"
 
 echo "Building..."
-"${WIX}\\candle" "${PROJECT}.wxs"
+"${WIX}\\candle" -ext WixUIExtension -ext WixUtilExtension "${PROJECT}.wxs"
 "${WIX}\\light" \
+        -ext WixUIExtension -ext WixUtilExtension \
 	-b abuPath="$PROGRAM_BIN" \
 	-b libabcBin="$PROGRAM_LIB" \
 	-b mingwBin="$MINGW_BIN" \
@@ -30,4 +31,4 @@ echo "Building..."
 	-o "${PROJECT}.msi" \
 	"${PROJECT}.wixobj"
 
-scp "${PROJECT}.msi" mardy.it:incoming/
+#scp "${PROJECT}.msi" mardy.it:incoming/
