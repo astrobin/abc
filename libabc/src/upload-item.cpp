@@ -152,8 +152,6 @@ bool UploadItemPrivate::checkReply(QNetworkReply *reply)
 void UploadItemPrivate::onUploadProgress(qint64 bytesSent,
                                          qint64 bytesTotal)
 {
-    DEBUG() << bytesSent << "out of" << bytesTotal;
-
     int progress = (bytesTotal > 0) ? bytesSent * 100 / bytesTotal : 0;
     /* Let's keep 100% for confirmed uploads only */
     if (progress >= 100) progress = 99;

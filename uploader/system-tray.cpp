@@ -69,8 +69,6 @@ SystemTray::~SystemTray()
 
 void SystemTray::onUploadQueueStatusChanged(UploadQueue::Status status)
 {
-    DEBUG() << "Queue changed status:" << status;
-
     if (status != previousStatus) {
         switch (status) {
         case UploadQueue::Uploading:
