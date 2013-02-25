@@ -5,14 +5,16 @@ Maintainer: Alberto Mardegan <info@mardy.it>
 Build-Depends: debhelper (>= 7),
  libqjson-dev,
  libqt4-dev (>= 4:4.7) | libqt4-47-dev,
+ libqt4-sql-sqlite,
  libraw-dev,
- pkg-config
+ pkg-config,
+ xvfb
 Standards-Version: 3.6.0
 
 Package: astrobin-uploader
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqt4-sql-sqlite
 Description: Synchronize your astrphotography files with astrobin.com
- Astrobin Uploader sits on a traybar and uploads your astrphotography
+ Astrobin Uploader sits on a traybar and uploads your astrophotography
  files to astrobin.com.
 Homepage: http://www.astrobin.com/rawdata/uploader

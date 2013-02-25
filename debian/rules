@@ -5,6 +5,10 @@ export DH_VERBOSE=1
 
 export DH_OPTIONS
 
+override_dh_clean:
+	cd cfitsio && make clean
+	dh_clean
+
 override_dh_auto_configure:
 	# first, build cfitsio
 	cd cfitsio && ./configure
@@ -14,13 +18,17 @@ override_dh_auto_configure:
 		CONFIG+="disable_python" \
 	   	abc.pro
 
-override_dh_autobuild:
+override_dh_auto_build:
 	cd cfitsio && make
 	dh_auto_build
 
+override_dh_auto_test:
+	xvfb-run -a dh_auto_test
+
 override_dh_install:
-	# We install only mappero geotagger
 	rm -rf debian/astrobin-uploader/opt/astrobin/include
+	mkdir -p debian/astrobin-uploader/usr/share/applications/
+	mv debian/astrobin-uploader/opt/astrobin/share/applications/* debian/astrobin-uploader/usr/share/applications/
 	dh_install
 
 %:
