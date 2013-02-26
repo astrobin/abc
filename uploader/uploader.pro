@@ -21,7 +21,9 @@ INCLUDEPATH += \
 
 QMAKE_LIBDIR += \
     $${LIBABC}/src/$${OBJECTS_DIR}
-QMAKE_RPATHDIR = $${QMAKE_LIBDIR}
+QMAKE_RPATHDIR = \
+    $${QMAKE_LIBDIR} \
+    $${INSTALL_PREFIX}/lib
 
 LIBS += \
     -labc

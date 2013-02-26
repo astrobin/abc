@@ -16,7 +16,7 @@ override_dh_auto_configure:
 		PREFIX="/opt/astrobin" \
 		"QMAKE_CXXFLAGS=$(CFLAGS)" \
 		CONFIG+="disable_python" \
-	   	abc.pro
+		abc.pro
 
 override_dh_auto_build:
 	cd cfitsio && make
