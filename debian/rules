@@ -29,6 +29,8 @@ override_dh_install:
 	rm -rf debian/astrobin-uploader/opt/astrobin/include
 	mkdir -p debian/astrobin-uploader/usr/share/applications/
 	mv debian/astrobin-uploader/opt/astrobin/share/applications/* debian/astrobin-uploader/usr/share/applications/
+	mkdir -p debian/astrobin-uploader/usr/share/icons/
+	mv debian/astrobin-uploader/opt/astrobin/share/icons/* debian/astrobin-uploader/usr/share/icons/
 	dh_install
 
 %:
