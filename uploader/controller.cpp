@@ -217,6 +217,7 @@ void ControllerPrivate::onAutoStartChanged(bool autoStart)
     if (autoStart) {
         if (desktopFile.exists()) return;
 
+        desktopFile.absoluteDir().mkpath(".");
         QFile file(desktopFile.absoluteFilePath());
         if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
             qWarning() << "Could not create autostart file";
